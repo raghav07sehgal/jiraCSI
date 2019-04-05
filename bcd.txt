@@ -1,0 +1,42 @@
+CSI-72746
+undefined
+undefined
+undefined
+to - 2019-04-02
+{ field: 'assignee',
+  fieldtype: 'jira',
+  from: 'ID30493',
+  fromString: 'Paras Anand',
+  to: 'bucklem',
+  toString: 'Michael Buckley' }
+undefined
+NaN
+CSI-72650
+undefined
+undefined
+undefined
+to - 2019-03-28
+{ field: 'assignee',
+  fieldtype: 'jira',
+  from: 'ID30493',
+  fromString: 'Paras Anand',
+  to: 'mitschkec',
+  toString: 'Cherie Mitschke' }
+undefined
+undefined
+from - 2019-04-01
+{ field: 'assignee',
+  fieldtype: 'jira',
+  from: 'ID30493',
+  fromString: 'Paras Anand',
+  to: 'raswal',
+  toString: 'Ritesh Aswal' }
+undefined
+to - 2019-04-02
+{ field: 'assignee',
+  fieldtype: 'jira',
+  from: 'ID30493',
+  fromString: 'Paras Anand',
+  to: 'pprovence',
+  toString: 'Paul Provence' }
+NaN
