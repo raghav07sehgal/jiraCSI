@@ -19,6 +19,7 @@
         "jira-connector": "^2.8.0",
         "jira-rest": "0.0.2",
         "jira-search": "^0.1.2",
+        "localStorage": "^1.0.4",
         "lodash": "^4.17.10",
         "moment": "^2.22.2",
         "moment-business-days": "^1.0.6",

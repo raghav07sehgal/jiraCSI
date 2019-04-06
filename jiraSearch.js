@@ -1,4 +1,5 @@
 var search = require('jira-search');
+var localStorage = require('localStorage');
 var fromDate, assignee, historyData, toDate, calDays;
 var flag = false;
 var index, historyDataIndex, historyDataLIndex, sIndex, eIndex = null;
@@ -18,7 +19,7 @@ search(
     },
     mapCallback: function (issue) {
 
-      console.log(issue.key);
+      console.log(issue.key + "\n");
       historyData = issue.changelog.histories;
       for (let i = 0; i < historyData.length; i++) {
         let date = historyData[i].created;
@@ -34,6 +35,7 @@ search(
               let fromStatus = items[j].fromString;
               let toStatus = items[j].toString;
               if (fromStatus == "Investigation & Research" && toStatus == "Inputs Required") {
+                // debugger
                 index = j;
                 sIndex = j;
                 let moveDate = date.split("T");
@@ -44,7 +46,6 @@ search(
                 var totalDays = calculateDays(fromDate, null);
               }
               if (fromStatus == "Inputs Required" && toStatus == "Investigation & Research") {
-                // index = j;
                 eIndex = j;
                 let returnDate = date.split("T");
                 let formatDate = new Date(returnDate[0]);
@@ -56,47 +57,58 @@ search(
             }
             if (index != null && statusField == "assignee") {
               assignee = items[index + 1].toString;
-              console.log("IR assignee name - " + assignee);
-              // console.log("days uner IR - " + totalDays);
+              console.log("IR assignee name - " + assignee + "\n");
+              console.log("days uner IR - " + totalDays);
             }
           }
         }
-
         if (sIndex) {
+          debugger
           historyDataIndex = i;
+          localStorage.setItem("stIndex", historyDataIndex);
           otherAssignee(historyDataIndex, null);
         }
         if (eIndex) {
+          debugger
           historyDataLIndex = i;
-          otherAssignee(null, historyDataLIndex);
+          var stIndex = localStorage.getItem("stIndex");
+          stIndex = parseInt(stIndex);
+          otherAssignee(stIndex, historyDataLIndex);
+
         }
 
       }
 
       function otherAssignee(fieldTypeSIndex, fieldTypeEIndex) {
-        // console.log("s" + fieldTypeSIndex + "e" + fieldTypeEIndex);
-        if (fieldTypeSIndex && fieldTypeEIndex) {
-          for (let i = fieldTypeSIndex + 1; i < fieldTypeEIndex; i++) {
-            let date = historyData[i].created;
-            let items = historyData[i].items;
-            for (let j = 0; j < items.length; j++) {
-              let statusField = items[j].field;
-              let fieldType = items[j].fieldtype;
-              if (fieldType == "jira") {
-                if (statusField == "assignee") {
-                  assignee = items[j].toString;
-                  console.log("Next assignee - " + assignee);
-                  let moveDate = date.split("T");
-                  let formatDate = new Date(moveDate[0]);
-                  fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
-                  console.log("Next assignee date - " + fromDate);
-                }
-              }
-            }
-          }
-        }
-        if (fieldTypeSIndex) {
-          let i = fieldTypeSIndex + 1;
+        debugger
+        localStorage.removeItem("stIndex");
+        // if (fieldTypeSIndex && fieldTypeEIndex) {
+        //   debugger
+        //   for (let i = fieldTypeSIndex + 1; i < fieldTypeEIndex; i++) {
+        //     let date = historyData[i].created;
+        //     let items = historyData[i].items;
+        //     for (let j = 0; j < items.length; j++) {
+        //       let statusField = items[j].field;
+        //       let fieldType = items[j].fieldtype;
+        //       if (fieldType == "jira") {
+        //         if (statusField == "assignee") {
+        //           assignee = items[j].toString;
+        //           var checkAsssignee = ignoreUser.includes(assignee);
+        //           if (checkAsssignee == false) {
+        //             let moveDate = date.split("T");
+        //             let formatDate = new Date(moveDate[0]);
+        //             fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
+        //             let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
+        //             console.log("Next assignee date - " + printDate);
+        //             console.log("Next assignee - " + assignee);
+        //           }
+        //         }
+        //       }
+        //     }
+        //   } localStorage.removeItem("stIndex");
+        // } else 
+        if (fieldTypeSIndex && !fieldTypeEIndex) {
+          debugger
           for (let i = fieldTypeSIndex + 1; i < historyData.length; i++) {
             let date = historyData[i].created;
             let items = historyData[i].items;
@@ -108,19 +120,24 @@ search(
                   assignee = items[j].toString;
                   var checkAsssignee = ignoreUser.includes(assignee);
                   if (checkAsssignee == false) {
-                    console.log("Next assignee -" + assignee);
                     let moveDate = date.split("T");
                     let formatDate = new Date(moveDate[0]);
                     fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
-                    console.log("Next assignee date -" + fromDate);
+                    let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
+                    console.log("Next assignee date - " + printDate);
+                    console.log("Next assignee -" + assignee + "\n");
                   }
                   else {
                     continue;
                   }
+                } else if (statusField == "status") {
+                  break;
                 }
               }
             }
           }
+        } else {
+          console.log("Ticket under NIIT account");
         }
       }
 
