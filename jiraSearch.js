@@ -52,7 +52,6 @@ search(
                 let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
                 irDate.push(fromDate);
                 console.log("Move input date - " + printDate);
-                debugger
                 calculateDays(irDate, ipDate, otAssDate);
               }
               //status returned from input required
@@ -63,13 +62,12 @@ search(
                 toDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
                 let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
                 ipDate.push(toDate);
-                console.log("return to NIIT Date - " + printDate);
-                debugger
+                console.log("Return to NIIT Date - " + printDate);
                 calculateDays(irDate, ipDate, otAssDate);
                 irDate = [];
                 ipDate = [];
                 otAssDate = [];
-                sole.log("days under IR Status - " + totalDays);
+                console.log("Days under IR Status - " + totalDays);
               }
             }
             if (index != null && statusField == "assignee") {
@@ -112,7 +110,7 @@ search(
                     fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
                     let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
                     console.log("Next assignee date - " + printDate);
-                    console.log("Next assignee -" + assignee + "\n");
+                    console.log("Next assignee - " + assignee + "\n");
                     otAssDate.push(fromDate);
                     calculateDays(irDate, ipDate, otAssDate);
                   }
@@ -131,7 +129,6 @@ search(
       }
 
       function calculateDays(fromDate, toDate, nextAsDate) {
-        debugger
         //Till next assignee day
         if ((fromDate.length != 0) && (nextAsDate.length != 0) && (toDate.length == 0)) {
           for (let i = 0; i < fromDate.length; i++) {
