@@ -1,8 +1,10 @@
 var search = require('jira-search');
 var localStorage = require('localStorage');
-var fromDate, assignee, historyData, toDate, totalDays;
+var fromDate, assignee, historyData, toDate, totalDays, IRformatTime, IPformatTime, OAformatTime, fromTime, toTime, nextAsTime;
 var flag = false;
-var index, historyDataIndex, historyDataLIndex, sIndex, eIndex = null;
+var index, historyDataIndex, historyDataLIndex,
+var sIndex = null;
+var eIndex = null;
 var ignoreUser = ["Paras Anand", "Ritesh Aswal", "Neeraj Pant", "Rohit Kanwar", "Tier 2 - Lead", "Prashant Gupta", "Neeharika Mittal", "Dheeraj Kumar"];
 var irDate = [];
 var ipDate = [];
@@ -27,6 +29,7 @@ search(
       irDate = [];
       ipDate = [];
       otAssDate = [];
+      fromTime = "", toTime = "", nextAsTime = "";
       for (let i = 0; i < historyData.length; i++) {
         let date = historyData[i].created;
         let items = historyData[i].items;
@@ -46,13 +49,15 @@ search(
                 sIndex = j;
                 let moveDate = date.split("T");
                 let formatDate = new Date(moveDate[0]);
-                let time = moveDate[1];
-                // console.log(time);
                 fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
                 let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
                 irDate.push(fromDate);
                 console.log("Move input date - " + printDate);
-                calculateDays(irDate, ipDate, otAssDate);
+                let time = moveDate[1];
+                IRformatTime = date.split(".");
+                calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+                // calculateTime(IRformatTime, IPformatTime, OAformatTime);
+
               }
               //status returned from input required
               if (fromStatus == "Inputs Required" && toStatus == "Investigation & Research") {
@@ -63,11 +68,13 @@ search(
                 let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
                 ipDate.push(toDate);
                 console.log("Return to NIIT Date - " + printDate);
-                calculateDays(irDate, ipDate, otAssDate);
+                let time = moveDate[1];
+                IPformatTime = date.split(".");
+                calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+                // calculateTime(IRformatTime, IPformatTime, OAformatTime);
                 irDate = [];
                 ipDate = [];
                 otAssDate = [];
-                console.log("Days under IR Status - " + totalDays);
               }
             }
             if (index != null && statusField == "assignee") {
@@ -96,6 +103,7 @@ search(
         if (fieldTypeSIndex && !fieldTypeEIndex) {
           for (let i = fieldTypeSIndex + 1; i < historyData.length; i++) {
             let date = historyData[i].created;
+            debugger
             let items = historyData[i].items;
             for (let j = 0; j < items.length; j++) {
               let statusField = items[j].field;
@@ -112,7 +120,11 @@ search(
                     console.log("Next assignee date - " + printDate);
                     console.log("Next assignee - " + assignee + "\n");
                     otAssDate.push(fromDate);
-                    calculateDays(irDate, ipDate, otAssDate);
+                    let time = moveDate[1];
+                    OAformatTime = date.split(".");
+                    // calculateTime(IRformatTime, IPformatTime, OAformatTime);
+                    calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+
                   }
                   else {
                     continue;
@@ -128,26 +140,32 @@ search(
         }
       }
 
-      function calculateDays(fromDate, toDate, nextAsDate) {
+      function calculateDays(fromDate, toDate, nextAsDate, fromTime, toTime, nextAsTime) {
+        debugger
         //Till next assignee day
         if ((fromDate.length != 0) && (nextAsDate.length != 0) && (toDate.length == 0)) {
           for (let i = 0; i < fromDate.length; i++) {
-            var startDate = Date.parse(fromDate[i]);
-            var endDate = Date.parse(nextAsDate[i]);
-            var timeDiff = startDate - endDate;
-            daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-            console.log("assignee day diff" + daysDiff);
+            if (fromDate[i] == nextAsDate[i]) {
+              let startTime
+              let endTime
+            } else {
+              var startDate = Date.parse(fromDate[i]);
+              var endDate = Date.parse(nextAsDate[i]);
+              var timeDiff = startDate - endDate;
+              daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+              console.log("Assignee difference days - " + daysDiff);
+            }
           }
         }
         //Till return to NIIT days
         if ((fromDate.length != 0) && (toDate.length != 0)) {
           if ((nextAsDate.length >= 0)) {
             for (let i = 0; i < fromDate.length; i++) {
-              var startDate = Date.parse(fromDate[i]);
-              var endDate = Date.parse(toDate[i]);
+              var startDate = Date.parse(toDate[i]);
+              var endDate = Date.parse(fromDate[i]);
               var timeDiff = startDate - endDate;
               daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-              console.log("Total Input days" + daysDiff);
+              console.log("Total Input days - " + daysDiff);
             }
           }
         }
@@ -161,7 +179,7 @@ search(
               var endDate = Date.parse(fromDate[i]);
               var timeDiff = startDate - endDate;
               daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-              console.log("Till Total Input days" + daysDiff);
+              console.log("Till Total Input days - " + daysDiff);
             }
           }
         }
