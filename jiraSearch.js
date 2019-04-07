@@ -2,7 +2,7 @@ var search = require('jira-search');
 var localStorage = require('localStorage');
 var fromDate, assignee, historyData, toDate, totalDays, IRformatTime, IPformatTime, OAformatTime, fromTime, toTime, nextAsTime;
 var flag = false;
-var index, historyDataIndex, historyDataLIndex,
+var index, historyDataIndex, historyDataLIndex;
 var sIndex = null;
 var eIndex = null;
 var ignoreUser = ["Paras Anand", "Ritesh Aswal", "Neeraj Pant", "Rohit Kanwar", "Tier 2 - Lead", "Prashant Gupta", "Neeharika Mittal", "Dheeraj Kumar"];
@@ -54,7 +54,8 @@ search(
                 irDate.push(fromDate);
                 console.log("Move input date - " + printDate);
                 let time = moveDate[1];
-                IRformatTime = date.split(".");
+                let formatTime = time.split(".");
+                IRformatTime = formatTime[0];
                 calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
                 // calculateTime(IRformatTime, IPformatTime, OAformatTime);
 
@@ -68,8 +69,9 @@ search(
                 let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
                 ipDate.push(toDate);
                 console.log("Return to NIIT Date - " + printDate);
-                let time = moveDate[1];
-                IPformatTime = date.split(".");
+                let time = returnDate[1];
+                let formatTime = time.split(".");
+                IPformatTime = formatTime[0];
                 calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
                 // calculateTime(IRformatTime, IPformatTime, OAformatTime);
                 irDate = [];
@@ -103,7 +105,6 @@ search(
         if (fieldTypeSIndex && !fieldTypeEIndex) {
           for (let i = fieldTypeSIndex + 1; i < historyData.length; i++) {
             let date = historyData[i].created;
-            debugger
             let items = historyData[i].items;
             for (let j = 0; j < items.length; j++) {
               let statusField = items[j].field;
@@ -121,7 +122,8 @@ search(
                     console.log("Next assignee - " + assignee + "\n");
                     otAssDate.push(fromDate);
                     let time = moveDate[1];
-                    OAformatTime = date.split(".");
+                    let formatTime = time.split(".");
+                    OAformatTime = formatTime[0];
                     // calculateTime(IRformatTime, IPformatTime, OAformatTime);
                     calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
 
@@ -141,13 +143,21 @@ search(
       }
 
       function calculateDays(fromDate, toDate, nextAsDate, fromTime, toTime, nextAsTime) {
-        debugger
         //Till next assignee day
         if ((fromDate.length != 0) && (nextAsDate.length != 0) && (toDate.length == 0)) {
           for (let i = 0; i < fromDate.length; i++) {
             if (fromDate[i] == nextAsDate[i]) {
-              let startTime
-              let endTime
+              let splitDate1 = fromDate[i].split('-');
+              let splitDate2 = nextAsDate[i].split('-');
+              var time_start = new Date(splitDate1[0], splitDate1[1], splitDate1[2]);
+              var time_end = new Date(splitDate2[0], splitDate2[1], splitDate2[2]);
+              var value_start = fromTime.split(':');
+              var value_end = nextAsTime.split(':');
+              time_start.setHours(value_start[0], value_start[1], value_start[2], 0)
+              time_end.setHours(value_end[0], value_end[1], value_end[2], 0)
+              var timeInMs = time_end - time_start;
+              var time = msToTime(timeInMs);
+              console.log("Assignee difference in time - " + time);
             } else {
               var startDate = Date.parse(fromDate[i]);
               var endDate = Date.parse(nextAsDate[i]);
@@ -161,11 +171,25 @@ search(
         if ((fromDate.length != 0) && (toDate.length != 0)) {
           if ((nextAsDate.length >= 0)) {
             for (let i = 0; i < fromDate.length; i++) {
-              var startDate = Date.parse(toDate[i]);
-              var endDate = Date.parse(fromDate[i]);
-              var timeDiff = startDate - endDate;
-              daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-              console.log("Total Input days - " + daysDiff);
+              if (fromDate[i] == toDate[i]) {
+                let splitDate1 = fromDate[i].split('-');
+                let splitDate2 = toDate[i].split('-');
+                var time_start = new Date(splitDate2[0], splitDate2[1], splitDate2[2]);
+                var time_end = new Date(splitDate1[0], splitDate1[1], splitDate1[2]);
+                var value_start = toTime.split(':');
+                var value_end = fromTime.split(':');
+                time_start.setHours(value_start[0], value_start[1], value_start[2], 0)
+                time_end.setHours(value_end[0], value_end[1], value_end[2], 0)
+                var timeInMs = time_end - time_start;
+                var time = msToTime(timeInMs);
+                console.log("Total Input in time - " + time);
+              } else {
+                var startDate = Date.parse(toDate[i]);
+                var endDate = Date.parse(fromDate[i]);
+                var timeDiff = startDate - endDate;
+                daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                console.log("Total Input days - " + daysDiff);
+              }
             }
           }
         }
@@ -183,6 +207,19 @@ search(
             }
           }
         }
+      }
+
+      function msToTime(duration) {
+        var milliseconds = parseInt((duration % 1000) / 100),
+          seconds = Math.floor((duration / 1000) % 60),
+          minutes = Math.floor((duration / (1000 * 60)) % 60),
+          hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+        hours = (hours < 10) ? "0" + hours : hours;
+        minutes = (minutes < 10) ? "0" + minutes : minutes;
+        seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+        return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
       }
 
       return issue.key;
