@@ -43,7 +43,7 @@ search(
           index = null;
           sIndex = null;
           eIndex = null;
-          dayFlag = true;
+          // dayFlag = true;
           for (let j = 0; j < items.length; j++) {
             let statusField = items[j].field;
             let fieldType = items[j].fieldtype;
@@ -263,5 +263,6 @@ search(
     }
   }).then(function (issues) {
     // consume the collected issues array here
-
   }).done();
+
+
