@@ -11,13 +11,14 @@ var ipDate = [];
 var otAssDate = [];
 var OAformatTime = [];
 var dayFlag = false;
+var aSFlag = false;
 
 search(
   {
     serverRoot: 'https://jira.hmhco.com', // the base URL for the JIRA server
     user: 'pantn', // the user name
     pass: 'Neeraj@123', // the password
-    jql: 'project = "CSI" AND status was "Inputs Required" AND assignee was in (aswalr) and createdDate >= "2019-3-27" AND createdDate< "2019-3-31"', // the JQL
+    jql: 'project = "CSI" AND status was "Inputs Required" AND assignee was in (aswalr) and createdDate >= "2018-3-25" AND createdDate< "2018-3-31"', // the JQL
     fields: '*all', // the fields parameter for the JIRA search
     expand: 'changelog', // the expand parameter for the JIRA search
     maxResults: 10, // the maximum number of results for each request to JIRA, multiple requests will be made till all the matching issues have been collected
@@ -27,7 +28,7 @@ search(
     mapCallback: function (issue) {
 
       if (issue) {
-        console.log(issue.key);
+        console.log("\n" + issue.key);
         ticketStatus = issue.fields.status.name;
         console.log("Current Ticket Status - " + ticketStatus + "\n");
 
@@ -120,17 +121,23 @@ search(
                     assignee = items[j].toString;
                     var checkAsssignee = ignoreUser.includes(assignee);
                     if (checkAsssignee == false) {
+                      debugger
                       let moveDate = date.split("T");
                       let formatDate = new Date(moveDate[0]);
                       fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
-                      let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
-                      console.log("Next assignee date - " + printDate);
-                      console.log("Next assignee - " + assignee + "\n");
-                      otAssDate.push(fromDate);
-                      let time = moveDate[1];
-                      let formatTime = time.split(".");
-                      OAformatTime.push(formatTime[0]);
-                      calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+                      if (fromDate < toDate) {
+                        debugger
+                        let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
+                        console.log("Next assignee date - " + printDate);
+                        console.log("Next assignee - " + assignee + "\n");
+                        otAssDate.push(fromDate);
+                        let time = moveDate[1];
+                        let formatTime = time.split(".");
+                        OAformatTime.push(formatTime[0]);
+                        calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+                      } else {
+                        return;
+                      }
                     }
                     else {
                       continue;
@@ -170,7 +177,7 @@ search(
                 } else {
                   var startDate = Date.parse(fstAsDate);
                   var endDate = Date.parse(nextAsDate[i]);
-                  var timeDiff = startDate - endDate;
+                  var timeDiff = endDate - startDate;
                   daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
                   console.log("Assignee between other assignee difference days - " + daysDiff + "\n");
                 }
@@ -228,7 +235,7 @@ search(
           }
           //still under input required days
           if ((fromDate.length != 0) && (toDate.length == 0) && dayFlag == false) {
-            if ((nextAsDate.length >= 0)) {
+            if ((nextAsDate.length > 0)) {
               for (let i = 0; i < fromDate.length; i++) {
                 var today = new Date();
                 var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
@@ -238,6 +245,9 @@ search(
                 daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
                 console.log("Till Total Input days - " + daysDiff);
               }
+            }
+            if ((nextAsDate.length == 0)) {
+              return;
             }
           }
 
