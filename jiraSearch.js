@@ -1,6 +1,6 @@
 var search = require('jira-search');
 var localStorage = require('localStorage');
-var fromDate, assignee, historyData, toDate, totalDays, IRformatTime, IPformatTime, OAformatTime, fromTime, toTime, nextAsTime;
+var fromDate, otherDate, assignee, historyData, toDate, totalDays, IRformatTime, IPformatTime, OAformatTime, fromTime, toTime, nextAsTime;
 var flag = false;
 var index, historyDataIndex, historyDataLIndex, ticketStatus;
 var sIndex = null;
@@ -18,7 +18,7 @@ search(
     serverRoot: 'https://jira.hmhco.com', // the base URL for the JIRA server
     user: 'pantn', // the user name
     pass: 'Neeraj@123', // the password
-    jql: 'project = "CSI" AND status was "Inputs Required" AND assignee was in (aswalr) and createdDate >= "2018-3-25" AND createdDate< "2018-3-31"', // the JQL
+    jql: 'project = "CSI" AND status was "Inputs Required" AND assignee was in (aswalr) and createdDate >= "2019-3-27" AND createdDate< "2019-3-31"', // the JQL
     fields: '*all', // the fields parameter for the JIRA search
     expand: 'changelog', // the expand parameter for the JIRA search
     maxResults: 10, // the maximum number of results for each request to JIRA, multiple requests will be made till all the matching issues have been collected
@@ -94,7 +94,7 @@ search(
 
             }
           }
-          if (sIndex) {
+          if (sIndex && !eIndex) {
             historyDataIndex = i;
             localStorage.setItem("stIndex", historyDataIndex);
             otherAssignee(historyDataIndex, null);
@@ -103,12 +103,15 @@ search(
             historyDataLIndex = i;
             var stIndex = localStorage.getItem("stIndex");
             stIndex = parseInt(stIndex);
+            debugger
             otherAssignee(stIndex, historyDataLIndex);
           }
+         
         }
 
         function otherAssignee(fieldTypeSIndex, fieldTypeEIndex) {
-          localStorage.removeItem("stIndex");
+          // localStorage.removeItem("stIndex");
+          debugger
           if (fieldTypeSIndex && !fieldTypeEIndex) {
             for (let i = fieldTypeSIndex + 1; i < historyData.length; i++) {
               let date = historyData[i].created;
@@ -119,25 +122,26 @@ search(
                 if (fieldType == "jira") {
                   if (statusField == "assignee") {
                     assignee = items[j].toString;
-                    var checkAsssignee = ignoreUser.includes(assignee);
-                    if (checkAsssignee == false) {
+                    // var checkAsssignee = ignoreUser.includes(assignee);
+                    var checkAsssignee = ignoreUser.indexOf(assignee);
+                    if (checkAsssignee == -1) {
                       debugger
                       let moveDate = date.split("T");
                       let formatDate = new Date(moveDate[0]);
-                      fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
-                      if (fromDate < toDate) {
-                        debugger
-                        let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
-                        console.log("Next assignee date - " + printDate);
-                        console.log("Next assignee - " + assignee + "\n");
-                        otAssDate.push(fromDate);
-                        let time = moveDate[1];
-                        let formatTime = time.split(".");
-                        OAformatTime.push(formatTime[0]);
-                        calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
-                      } else {
-                        return;
-                      }
+                      otherDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
+                      // if (otherDate <= toDate) {
+                      debugger
+                      let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
+                      console.log("Next assignee date - " + printDate);
+                      console.log("Next assignee - " + assignee + "\n");
+                      otAssDate.push(otherDate);
+                      let time = moveDate[1];
+                      let formatTime = time.split(".");
+                      OAformatTime.push(formatTime[0]);
+                      calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+                      // } else {
+                      //   return;
+                      // }
                     }
                     else {
                       continue;
@@ -235,7 +239,7 @@ search(
           }
           //still under input required days
           if ((fromDate.length != 0) && (toDate.length == 0) && dayFlag == false) {
-            if ((nextAsDate.length > 0)) {
+            if ((nextAsDate.length >= 0)) {
               for (let i = 0; i < fromDate.length; i++) {
                 var today = new Date();
                 var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
@@ -246,9 +250,9 @@ search(
                 console.log("Till Total Input days - " + daysDiff);
               }
             }
-            if ((nextAsDate.length == 0)) {
-              return;
-            }
+            // if ((nextAsDate.length == 0)) {
+            //   return;
+            // }
           }
 
         }
