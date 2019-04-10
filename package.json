@@ -8,6 +8,7 @@
         "cors": "^2.8.4",
         "ews-javascript-api": "^0.9.3-dev.2",
         "excel4node": "^1.7.1",
+        "exceljs": "^1.9.0",
         "express": "^4.16.3",
         "express-http-to-https": "^1.1.4",
         "file-system": "^2.2.2",
@@ -35,6 +36,8 @@
         "pem": "^1.12.6",
         "request": "^2.87.0",
         "underscore": "^1.9.1",
+        "url": "^0.11.0",
+        "xlsx": "^0.14.2",
         "xlsx-chart": "^0.3.0"
     },
     "devDependencies": {
