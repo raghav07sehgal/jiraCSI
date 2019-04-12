@@ -21,6 +21,8 @@ var rowData1 = [];
 var rowData2 = [];
 var rowData3 = [];
 var rowData4 = [];
+var rowiPData1 = [];
+var rowiRData1 = [];
 var iRData = [];
 var iPrData = [];
 var othAssData = [];
@@ -105,18 +107,18 @@ exports.setData = function (data) {
 					}
 					// else if (toDate) {
 					// 	iPrData.push({ csi: issue.key, toName: assignee, toDate: toDate, AssdaysDiff: daysDiff, totalDays: TdaysDiff, tillTotalDays: SdaysDiff });
-					// 	debugger
+					// 	
 					// }
 					// else{
-					// 	debugger
+					// 	
 					// }
 					console.log("IR assignee name - " + assignee);
 				}
-				// debugger
+				// 
 				// if (index != null && statusField == "status") {
 				// 	if (toDate) {
 				// 		iPrData.push({ csi: issue.key, toName: assignee, toDate: toDate, AssdaysDiff: daysDiff, totalDays: TdaysDiff, tillTotalDays: SdaysDiff });
-				// debugger
+				// 
 				// 	}
 				// }
 			}
@@ -242,7 +244,7 @@ exports.setData = function (data) {
 	var checkFunction = createExcel(filePath);
 	if (checkFunction == "flagExcel") {
 		iRData = [];
-		debugger
+
 		iPrData = [];
 		othAssData = [];
 	}
@@ -261,34 +263,41 @@ function createExcel(excelFilePath) {
 
 function writeExcel() {
 	for (let i = 0; i < iRData.length; i++) {
-		debugger
-		rowData1[1] = iRData[i].csi;
-		rowData1[2] = iRData[i].fromDate;
-		rowData1[4] = iRData[i].toName;
+
+
 		if (iRData.length > 0 && othAssData.length > 0) {
 			for (let k = 0; k < othAssData.length; k++) {
 				if (iRData[i].csi == othAssData[k].csi) {
+					rowData1[1] = iRData[i].csi;
+					rowData1[2] = iRData[i].fromDate;
+					rowData1[4] = iRData[i].toName;
 					rowData1[3] = othAssData[k].otherDate;
 					rowData1[5] = othAssData[k].daysDiff;
+					newSheet.addRow(rowData1);
 				}
 			}
 		} else if (iRData.length > 0 && iPrData.length > 0) {
-			debugger
-			for (let j = 0; j < iPrData.length; j++) {
+			for (let j = i; j < iPrData.length; j++) {
 				if (iRData[i].csi == iPrData[j].csi) {
-					rowData1[3] = iPrData[j].toDate;
-					rowData1[5] = iPrData[j].totalDays;
+					rowiPData1[1] = iRData[i].csi;
+					rowiPData1[2] = iRData[i].fromDate;
+					rowiPData1[4] = iRData[i].toName;
+					rowiPData1[3] = iPrData[i].toDate;
+					rowiPData1[5] = iPrData[i].totalDays;
+					newSheet.addRow(rowiPData1);
 				}
 			}
 		} else {
-			rowData1[3] = "";
-			// rowData1[5] = iRData[i].daysDiff;
-			rowData1[5] = iRData[i].tillTotalDays;
+			rowiRData1[1] = iRData[i].csi;
+			rowiRData1[2] = iRData[i].fromDate;
+			rowiRData1[4] = iRData[i].toName;
+			rowiRData1[3] = "";
+			rowiRData1[5] = iRData[i].tillTotalDays;
+			newSheet.addRow(rowiRData1);
 		}
-		newSheet.addRow(rowData1);
-		debugger
+
 		if (iPrData.length > 0) {
-			debugger
+
 			for (let j = 0; j < iPrData.length; j++) {
 				let iprLength = iPrData.length;
 
@@ -312,20 +321,20 @@ function writeExcel() {
 						break;
 					}
 
-					debugger;
+					;
 				}
 			}
 		}
 		if (othAssData.length > 0) {
-			debugger
-			for (let k = 0; k < othAssData.length; k++) {
+
+			for (let k = i; k < othAssData.length; k++) {
 				// if (othAssData[k] != null) {
 				debugger
 				if (iRData[i].csi == othAssData[k].csi) {
 					rowData3[1] = othAssData[k].csi;
-					rowData3[2] = iRData[i].fromDate;
+					rowData3[2] = iRData[k].fromDate;
 					if (iPrData.length > 0) {
-						debugger
+
 						for (let j = 0; j < iPrData.length; j++) {
 							rowData3[3] = iPrData[j].toDate;
 						}
@@ -339,36 +348,121 @@ function writeExcel() {
 						rowData3[5] = othAssData[k].daysDiff;
 					}
 					newSheet.addRow(rowData3);
-					debugger
+
 				}
 				// }
 			}
 		}
 	}
 
+	if (rowData1 || rowData2 || rowData3) {
+		totalData(rowData1, rowData2, rowData3);
+	}
+}
+function totalData(rowData1, rowData2, rowData3) {
+	var flag1 = false;
+	var flag2 = false;
+	var flag3 = false;
 	rowData4[1] = issue.key;
 	rowData4[2] = "";
 	rowData4[3] = "";
 	rowData4[4] = "Total";
-	if (rowData1.length > 0 && rowData2.length > 0 && rowData3.length > 0) {
-		let fst = rowData1[5];
-		let scnd = rowData2[5];
-		let third = rowData3[5];
-		rowData4[5] = fst + scnd + third;
-	}
-	if (rowData1.length > 0 && rowData2.length > 0) {
-		let fst = rowData1[5];
-		let scnd = rowData2[5];
-		rowData4[5] = fst + scnd;
-	}
-	if (rowData1.length > 0 && rowData3.length > 0) {
-		let fst = rowData1[5];
-		let scnd = rowData3[5];
-		rowData4[5] = fst + scnd;
+	debugger
+	if (rowData1.length > 0 && rowData2.length > 0 && rowData3.length > 0 && flag2 == false && flag3 == false) {
+		if (rowiPData1.length > 0) {
+			if (rowiPData1[1] == rowData1[1]) {
+				if ((rowData1[1] == rowData2[1])) {
+					let fst = rowData1[5];
+					let scnd = rowiPData1[5];
+					let third = rowData2[5];
+					rowData4[5] = fst + scnd + third;
+					flag1 = true;
+				}
+				if ((rowData1[1] == rowData3[1])) {
+					let fst = rowData1[5];
+					let scnd = rowiPData1[5];
+					let third = rowData3[5];
+					rowData4[5] = fst + scnd + third;
+					flag1 = true;
+				}
+			} else {
+				debugger
+				rowData4[5] = rowiPData1[5];
+				flag1 = true;
+			}
+		}
+		if (rowiRData1.length > 0) {
+			if (rowData1[1] == rowiRData1[1]) {
+				if ((rowData1[1] == rowData2[1])) {
+					let fst = rowData1[5];
+					let scnd = rowiRData1[5];
+					let third = rowData2[5];
+					rowData4[5] = fst + scnd + third;
+					flag1 = true;
+				}
+				if ((rowData1[1] == rowData3[1])) {
+					let fst = rowData1[5];
+					let scnd = rowiRData1[5];
+					let third = rowData3[5];
+					rowData4[5] = fst + scnd + third;
+					flag1 = true;
+				}
+			} else {
+				rowData4[5] = rowiRData1[5];
+				flag1 = true;
+			}
+			if (rowData1[1] == rowiRData1[1]) {
+				let fst = rowData1[5];
+				let scnd = rowData2[5];
+				let third = rowData3[5];
+				rowData4[5] = fst + scnd + third;
+				flag1 = true;
+			}
+		}
 	}
 
+	if (rowData1.length > 0 && rowData2.length > 0 && flag1 == false && flag3 == false) {
+		if (rowData1[1] == rowData2[1]) {
+			let fst = rowData1[5];
+			let scnd = rowData2[5];
+			rowData4[5] = fst + scnd;
+			flag2 = true;
+		}
+
+	}
+	if (rowData1.length > 0 && rowData3.length > 0 && flag1 == false && flag2 == false) {
+		if (rowData1[1] == rowData3[1]) {
+			let fst = rowData1[5];
+			let scnd = rowData3[5];
+			rowData4[5] = fst + scnd;
+			flag3 = true;
+		}
+	}
+	debugger
 	newSheet.addRow(rowData4);
 
+	if (flag1 == true) {
+		debugger
+		rowData1 = [];
+		rowData2 = [];
+		rowData3 = [];
+		rowiRData1 = [];
+		rowiPData1 = [];
+	} else if (flag2 == true) {
+		debugger
+		rowData1 = [];
+		rowData2 = [];
+		rowData3 = [];
+		rowiRData1 = [];
+		rowiPData1 = [];
+	} else {
+		debugger
+		rowData1 = [];
+		rowData2 = [];
+		rowData3 = [];
+		rowiRData1 = [];
+		rowiPData1 = [];
+	}
 }
 
 
