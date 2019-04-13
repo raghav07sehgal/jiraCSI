@@ -14,6 +14,7 @@ var dayFlag = false;
 var aSFlag = false;
 var returnFlag = false;
 var otFlag = false;
+var ipData = false;
 // var filePath = "D:/raghavData/PROJECTS/project SM/Server/Report.xlsx";
 var filePath = "R:/my files/niit/jiraApi/jiraCSI/Report.xlsx";
 var Excel = require('exceljs');// load exceljs module
@@ -274,6 +275,8 @@ function createExcel(excelFilePath) {
 
 
 function writeExcel() {
+	debugger
+	ipData = false;
 	for (let i = 0; i < iRData.length; i++) {
 		if (iRData.length > 0 && othAssData.length > 0) {
 			for (let k = 0; k < othAssData.length; k++) {
@@ -314,7 +317,8 @@ function writeExcel() {
 					rowiPData1[3] = iPrData[i].toDate;
 					rowiPData1[5] = iPrData[i].totalDays;
 					newSheet.addRow(rowiPData1);
-
+					ipData = true;
+					debugger
 				}
 			}
 		} else {
@@ -331,14 +335,12 @@ function writeExcel() {
 			for (let j = 0; j < iPrData.length; j++) {
 				if (iRData[i].csi == iPrData[j].csi) {
 
-					if (rowData2.length == 0) {
+					if (rowData2.length == 0 && ipData == false) {
 						rowData2[1] = iPrData[j].csi;
 						rowData2[3] = iPrData[j].toDate;
-
 						if (othAssData.length > 0) {
 							let otLen = othAssData.length;
 							for (let k = 0; k < othAssData.length; k++) {
-
 								rowData2[2] = othAssData[otLen - 1].otherDate;
 								rowData2[4] = othAssData[k].otherName;
 								let startDT = rowData2[3];
@@ -391,8 +393,8 @@ function writeExcel() {
 		}
 	}
 
-	if (rowData1.length > 0 || rowData2.length > 0 || rowData3.length > 0) {
-
+	if (rowData1.length > 0 || rowData2.length > 0 || rowData3.length > 0 || rowiPData1.length > 0) {
+		debugger
 		totalData(rowData1, rowData2, rowData3);
 	}
 }
@@ -404,11 +406,12 @@ function totalData(rowData1, rowData2, rowData3) {
 	rowData4[2] = "";
 	rowData4[3] = "";
 	rowData4[4] = "Total";
-
+	debugger
 	if (rowData1.length > 0 && rowData2.length > 0 && rowData3.length > 0 && flag2 == false && flag3 == false) {
 		flag1 = true;
 		debugger
 		if (rowiPData1.length > 0) {
+			debugger
 			if (rowiPData1[1] == rowData1[1]) {
 				if ((rowData1[1] == rowData2[1])) {
 					let fst = rowData1[5];
@@ -480,6 +483,17 @@ function totalData(rowData1, rowData2, rowData3) {
 		if (rowiRData1.length > 0) {
 			rowData4[5] = rowiRData1[5];
 		}
+		if (rowiPData1.length > 0) {
+			if (rowData1[1] == rowiPData1[1] && rowiPData1[1] == rowData2[1]) {
+				let fst = rowData1[5];
+				let scnd = rowData2[5];
+				let third = rowiPData1[5];
+				rowData4[5] = fst + scnd + third;
+			} else {
+				rowData4[5] = rowiPData1[5];
+			}
+
+		}
 	}
 	if (rowData1.length > 0 && rowData3.length > 0 && flag1 == false && flag2 == false) {
 		flag3 = true;
@@ -489,7 +503,9 @@ function totalData(rowData1, rowData2, rowData3) {
 			rowData4[5] = fst + scnd;
 		}
 	}
-
+	if (rowiPData1.length > 0 && flag1 == false && flag2 == false && flag3 == false) {
+		rowData4[5] = rowiPData1[5];
+	}
 	newSheet.addRow(rowData4);
 
 
