@@ -33,8 +33,8 @@ var iPrData = [];
 var othAssData = [];
 var daysData = [];
 var otherAsDataAdd = [];
-
-
+var ipDataAdd = [];
+assignee = "";
 
 addRowToNewExcel();
 function addRowToNewExcel() {
@@ -88,7 +88,7 @@ exports.setData = function (data) {
 						let time = moveDate[1];
 						let formatTime = time.split(".");
 						IRformatTime = formatTime[0];
-
+						debugger
 						calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
 
 						// iRData.push({ csi: issue.key, toName: assignee, fromDate: fromDate, daysDiff: daysDiff, tillTotalDays: SdaysDiff });
@@ -113,7 +113,6 @@ exports.setData = function (data) {
 						otAssDate = [];
 					}
 				}
-
 				if (statusField == "assignee") {
 					//By whom assignee back to I&R state
 					// if (returnFlag && eIndex != null) {
@@ -128,7 +127,26 @@ exports.setData = function (data) {
 						console.log("IR assignee name - " + assignee);
 						if (fromDate) {
 							iRData.push({ csi: issue.key, toName: assignee, fromDate: fromDate, daysDiff: daysDiff, tillTotalDays: SdaysDiff });
+							assignee = "";
+							if (iRData.length > 1) {
+								for (let k = 0; k < iRData.length; k++) {
+									debugger
+									if ((iRData.length) != (k + 1)) {
+										if (iRData[k].fromDate == iRData[k + 1].fromDate) {
+											debugger
+											if (iRData[k].toName == "") {
+												iRData.splice(k, 1);
+												debugger
+											}
+										}
+									}
+								}
+							}
 						}
+					}
+				} else {
+					if (index != null && fromDate) {
+						iRData.push({ csi: issue.key, toName: assignee, fromDate: fromDate, daysDiff: daysDiff, tillTotalDays: SdaysDiff });
 					}
 				}
 			}
@@ -148,6 +166,7 @@ exports.setData = function (data) {
 			otherAssignee(stIndex, historyDataLIndex);
 		}
 	}
+
 
 	function otherAssignee(fieldTypeSIndex, fieldTypeEIndex) {
 		// localStorage.removeItem("stIndex");
@@ -277,16 +296,30 @@ function createExcel(excelFilePath) {
 function writeExcel() {
 	debugger
 	ipData = false;
+	otFlag = false;
+	ipDataAdd = [];
+	otherAsDataAdd = [];
 	for (let i = 0; i < iRData.length; i++) {
+
 		if (iRData.length > 0 && othAssData.length > 0) {
 			for (let k = 0; k < othAssData.length; k++) {
 				if (iRData[i].csi == othAssData[k].csi) {
 					if (otFlag == false) {
 						rowData1[1] = iRData[i].csi;
-						rowData1[2] = iRData[i].fromDate;
 						rowData1[4] = iRData[i].toName;
-						rowData1[3] = othAssData[k].otherDate;
+						let fstDate = iRData[i].fromDate;
+						let scndDate = othAssData[k].otherDate;
+						// assign later after input required
+						if (fstDate > scndDate) {
+							rowData1[2] = "";
+							rowData1[3] = othAssData[k].otherDate;
+							rowData1[6] = "Assignee was not assigned on same day.";
+						} else {
+							rowData1[2] = iRData[i].fromDate;
+							rowData1[3] = othAssData[k].otherDate;
+						}
 						rowData1[5] = othAssData[k].daysDiff;
+
 						otFlag = true;
 						newSheet.addRow(rowData1);
 						debugger
@@ -299,12 +332,13 @@ function writeExcel() {
 						rowData5[2] = othAssData[k].otherDate;
 						rowData5[4] = othAssData[k].otherName;
 						if (otLen != (k + 1)) {
+							debugger
 							rowData5[3] = othAssData[k + 1].otherDate;
 							rowData5[5] = othAssData[k + 1].daysDiff;
 						}
 						otherAsDataAdd.push({ csi: rowData5[1], days: rowData5[5] });
 						newSheet.addRow(rowData5);
-
+						debugger
 					}
 				}
 			}
@@ -317,8 +351,10 @@ function writeExcel() {
 					rowiPData1[3] = iPrData[i].toDate;
 					rowiPData1[5] = iPrData[i].totalDays;
 					newSheet.addRow(rowiPData1);
-					ipData = true;
 					debugger
+					ipDataAdd.push({ csi: rowiPData1[1], days: rowiPData1[5] });
+					ipData = true;
+					break;
 				}
 			}
 		} else {
@@ -349,7 +385,6 @@ function writeExcel() {
 								var endDate = Date.parse(endDT);
 								var timeDiff = startDate - endDate;
 								var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-
 								rowData2[5] = daysDiffOt;
 								othAssData = [];
 							}
@@ -360,7 +395,7 @@ function writeExcel() {
 							rowData2[5] = iPrData[j].totalDays;
 						}
 						newSheet.addRow(rowData2);
-
+						debugger
 					} else {
 						break;
 					}
@@ -369,31 +404,48 @@ function writeExcel() {
 		}
 		if (othAssData.length > 0) {
 			for (let k = i; k < othAssData.length; k++) {
-
-				if (iRData[i].csi == othAssData[k].csi) {
+				if (othAssData.length == 1) {
 					rowData3[1] = othAssData[k].csi;
-					rowData3[2] = iRData[i].fromDate;
-					if (iPrData.length > 0) {
-						for (let j = 0; j < iPrData.length; j++) {
-							rowData3[3] = iPrData[j].toDate;
-						}
-					} else {
-						rowData3[3] = "";
-					}
+					rowData3[2] = othAssData[i].otherDate;
+					rowData3[3] = "";
 					rowData3[4] = othAssData[k].otherName;
-					if (iRData.length > 0) {
-						rowData3[5] = iRData[i].tillTotalDays;
-					} else {
-						rowData3[5] = othAssData[k].daysDiff;
-					}
+					let fst = othAssData[i].otherDate;
+					var today = new Date();
+					var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+					var startDate = Date.parse(currentDate);
+					var endDate = Date.parse(fst);
+					var timeDiff = startDate - endDate;
+					var otDaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+					rowData3[5] = otDaysDiff;
 					newSheet.addRow(rowData3);
-
+					debugger
+				} else {
+					if (iRData[i].csi == othAssData[k].csi) {
+						rowData3[1] = othAssData[k].csi;
+						rowData3[2] = iRData[i].fromDate;
+						if (iPrData.length > 0) {
+							for (let j = 0; j < iPrData.length; j++) {
+								rowData3[3] = iPrData[j].toDate;
+							}
+						} else {
+							rowData3[3] = "";
+						}
+						rowData3[4] = othAssData[k].otherName;
+						if (iRData.length > 0) {
+							rowData3[5] = iRData[i].tillTotalDays;
+						} else {
+							rowData3[5] = othAssData[k].daysDiff;
+						}
+						newSheet.addRow(rowData3);
+						debugger
+					}
 				}
+
 			}
 		}
 	}
 
-	if (rowData1.length > 0 || rowData2.length > 0 || rowData3.length > 0 || rowiPData1.length > 0) {
+	if (rowData1.length > 0 || rowData2.length > 0 || rowData3.length > 0 || rowiPData1.length > 0 || rowiRData1.length > 0) {
 		debugger
 		totalData(rowData1, rowData2, rowData3);
 	}
@@ -426,7 +478,17 @@ function totalData(rowData1, rowData2, rowData3) {
 					rowData4[5] = fst + scnd + third;
 				}
 			} else {
-				rowData4[5] = rowiPData1[5];
+				if (ipDataAdd.length > 1) {
+					var iPsum = 0;
+					for (let i = 0; i < ipDataAdd.length; i++) {
+						debugger
+						iPsum += ipDataAdd[i].days;
+						rowData4[5] = iPsum;
+					}
+				} else {
+					rowData4[5] = rowiPData1[5];
+				}
+
 			}
 		}
 		if (rowiRData1.length > 0) {
@@ -455,7 +517,11 @@ function totalData(rowData1, rowData2, rowData3) {
 
 			}
 		}
-
+		if (rowData1[1] == rowData3[1]) {
+			let fst = rowData1[5];
+			let scnd = rowData3[5];
+			rowData4[5] = fst + scnd;
+		}
 	}
 
 	if (rowData1.length > 0 && rowData2.length > 0 && flag1 == false && flag3 == false) {
@@ -484,13 +550,17 @@ function totalData(rowData1, rowData2, rowData3) {
 			rowData4[5] = rowiRData1[5];
 		}
 		if (rowiPData1.length > 0) {
-			if (rowData1[1] == rowiPData1[1] && rowiPData1[1] == rowData2[1]) {
-				let fst = rowData1[5];
-				let scnd = rowData2[5];
-				let third = rowiPData1[5];
-				rowData4[5] = fst + scnd + third;
+			if (rowData4.length > 0) {
+				rowData4[5] += rowiPData1[5];
 			} else {
-				rowData4[5] = rowiPData1[5];
+				if (rowData1[1] == rowiPData1[1] && rowiPData1[1] == rowData2[1]) {
+					let fst = rowData1[5];
+					let scnd = rowData2[5];
+					let third = rowiPData1[5];
+					rowData4[5] = fst + scnd + third;
+				} else {
+					rowData4[5] = rowiPData1[5];
+				}
 			}
 
 		}
@@ -504,11 +574,24 @@ function totalData(rowData1, rowData2, rowData3) {
 		}
 	}
 	if (rowiPData1.length > 0 && flag1 == false && flag2 == false && flag3 == false) {
-		rowData4[5] = rowiPData1[5];
+
+		if (ipDataAdd.length > 1) {
+			var iPsum = 0;
+			for (let i = 0; i < ipDataAdd.length; i++) {
+				debugger
+				iPsum += ipDataAdd[i].days;
+				rowData4[5] = iPsum;
+			}
+		} else {
+			rowData4[5] = rowiPData1[5];
+		}
+	}
+	if (rowiRData1.length > 0 && flag1 == false && flag2 == false && flag3 == false) {
+		rowData4[5] = rowiRData1[5];
 	}
 	newSheet.addRow(rowData4);
 
-
+	cleanData();
 	if (flag1 == true) {
 		rowData1 = [];
 		rowData2 = [];
@@ -536,4 +619,13 @@ function totalData(rowData1, rowData2, rowData3) {
 	}
 }
 
+function cleanData() {
+	rowData1 = [];
+	rowData2 = [];
+	rowData3 = [];
+	rowiRData1 = [];
+	rowiPData1 = [];
+	rowData5 = [];
+	rowData4 = [];
+}
 
