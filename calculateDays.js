@@ -75,22 +75,18 @@ exports.setData = function (data) {
 					let toStatus = items[j].toString;
 					//status moved to input required
 					if (fromStatus == "Investigation & Research" && toStatus == "Inputs Required") {
-
 						index = j;
 						sIndex = j;
 						let moveDate = date.split("T");
 						let formatDate = new Date(moveDate[0]);
 						fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
 						let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
-
 						irDate.push(fromDate);
 						console.log("Move input date - " + printDate);
 						let time = moveDate[1];
 						let formatTime = time.split(".");
 						IRformatTime = formatTime[0];
-						debugger
 						calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
-
 						// iRData.push({ csi: issue.key, toName: assignee, fromDate: fromDate, daysDiff: daysDiff, tillTotalDays: SdaysDiff });
 					}
 					//status returned from input required
@@ -130,13 +126,10 @@ exports.setData = function (data) {
 							assignee = "";
 							if (iRData.length > 1) {
 								for (let k = 0; k < iRData.length; k++) {
-									debugger
 									if ((iRData.length) != (k + 1)) {
 										if (iRData[k].fromDate == iRData[k + 1].fromDate) {
-											debugger
 											if (iRData[k].toName == "") {
 												iRData.splice(k, 1);
-												debugger
 											}
 										}
 									}
@@ -153,11 +146,9 @@ exports.setData = function (data) {
 		}
 
 		if (sIndex && !eIndex) {
-
 			historyDataIndex = i;
 			localStorage.setItem("stIndex", historyDataIndex);
 			otherAssignee(historyDataIndex, null);
-			// writeExcel();
 		}
 		if (eIndex) {
 			historyDataLIndex = i;
@@ -273,7 +264,7 @@ exports.setData = function (data) {
 		}
 	}
 
-	writeExcel();
+	// writeExcel();
 	var checkFunction = createExcel(filePath);
 	if (checkFunction == "flagExcel") {
 		iRData = [];
@@ -291,8 +282,6 @@ function createExcel(excelFilePath) {
 	return "flagExcel";
 }
 
-
-
 function writeExcel() {
 	debugger
 	ipData = false;
@@ -301,25 +290,77 @@ function writeExcel() {
 	otherAsDataAdd = [];
 	for (let i = 0; i < iRData.length; i++) {
 
+		// if (iRData.length > 0 && othAssData.length > 0 && iPrData.length > 0) {
+		// 	for (let j = 0; j < othAssData.length; j++) {
+		// 		for (let k = 0; k < iPrData.length; k++) {
+		// 			if (iRData[i].fromDate > othAssData[j].otherDate) {
+		// 				rowData6[1] = iRData[i].csi;
+		// 				rowData6[2] = iRData[i].fromDate;
+		// 				rowData6[3] = othAssData[j].otherDate;
+		// 				rowData6[4] = iRData[i].toName;
+		// 				rowData6[5] = othAssData[j].daysDiff;
+		// 				newSheet.addRow(rowData6);
+		// 				debugger
+		// 			} else if (othAssData[j].otherDate < iPrData[k].toDate) {
+		// 				rowData7[1] = othAssData[j].csi;
+		// 				rowData7[2] = othAssData[i].otherDate;
+		// 				rowData7[3] = iPrData[k].toDate;
+		// 				rowData7[4] = othAssData[j].otherName
+		// 				rowData7[5] = iPrData[k].totalDays;
+		// 				newSheet.addRow(rowData7);
+		// 				debugger
+		// 			}
+		// 			else {
+		// 				rowData8[1] = iRData[i].csi;
+		// 				rowData8[2] = iRData[i].fromDate;
+		// 				rowData8[4] = iRData[i].toName;
+		// 				rowData8[3] = iPrData[k].toDate;
+		// 				rowData8[5] = iPrData[k].totalDays;
+		// 				newSheet.addRow(rowData8);
+		// 				debugger
+		// 			}
+		// 		}
+
+		// 	}
+		// }
+		debugger
 		if (iRData.length > 0 && othAssData.length > 0) {
 			for (let k = 0; k < othAssData.length; k++) {
 				if (iRData[i].csi == othAssData[k].csi) {
 					if (otFlag == false) {
-						rowData1[1] = iRData[i].csi;
-						rowData1[4] = iRData[i].toName;
-						let fstDate = iRData[i].fromDate;
-						let scndDate = othAssData[k].otherDate;
-						// assign later after input required
-						if (fstDate > scndDate) {
-							rowData1[2] = "";
-							rowData1[3] = othAssData[k].otherDate;
-							rowData1[6] = "Assignee was not assigned on same day.";
-						} else {
-							rowData1[2] = iRData[i].fromDate;
-							rowData1[3] = othAssData[k].otherDate;
+						let irFstDate = iRData[i].fromDate;
+						if (iRData.length != i + 1) {
+							var irSecndDate = iRData[i + 1].fromDate;
 						}
-						rowData1[5] = othAssData[k].daysDiff;
-
+						let otThrdDate = othAssData[k].otherDate;
+						debugger
+						if (irFstDate <= irSecndDate && otThrdDate >= irFstDate && otThrdDate <= irSecndDate) {
+							debugger
+							for (let j = i; j < iPrData.length; j++) {
+								rowData1[1] = iRData[i].csi;
+								rowData1[2] = iRData[i].fromDate;
+								rowData1[4] = iRData[i].toName;
+								rowData1[3] = iPrData[i].toDate;
+								rowData1[5] = iPrData[i].totalDays;
+								newSheet.addRow(rowData1);
+								debugger
+							}
+						} else {
+							rowData1[1] = iRData[i].csi;
+							rowData1[4] = iRData[i].toName;
+							let fstDate = iRData[i].fromDate;
+							let scndDate = othAssData[k].otherDate;
+							// assign later after input required
+							if (fstDate > scndDate) {
+								rowData1[2] = "";
+								rowData1[3] = othAssData[k].otherDate;
+								rowData1[6] = "Assignee was not assigned on same day.";
+							} else {
+								rowData1[2] = iRData[i].fromDate;
+								rowData1[3] = othAssData[k].otherDate;
+							}
+							rowData1[5] = othAssData[k].daysDiff;
+						}
 						otFlag = true;
 						newSheet.addRow(rowData1);
 						debugger
@@ -343,6 +384,7 @@ function writeExcel() {
 				}
 			}
 		} else if (iRData.length > 0 && iPrData.length > 0) {
+			debugger
 			for (let j = i; j < iPrData.length; j++) {
 				if (iRData[i].csi == iPrData[j].csi) {
 					rowiPData1[1] = iRData[i].csi;
@@ -358,6 +400,7 @@ function writeExcel() {
 				}
 			}
 		} else {
+			debugger
 			rowiRData1[1] = iRData[i].csi;
 			rowiRData1[2] = iRData[i].fromDate;
 			rowiRData1[4] = iRData[i].toName;
