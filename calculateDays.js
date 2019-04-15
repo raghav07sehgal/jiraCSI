@@ -28,13 +28,17 @@ var rowData4 = [];
 var rowData5 = [];
 var rowiPData1 = [];
 var rowiRData1 = [];
+var rowAllData = [];
 var iRData = [];
 var iPrData = [];
 var othAssData = [];
 var daysData = [];
 var otherAsDataAdd = [];
 var ipDataAdd = [];
+var allDataAdd = [];
 assignee = "";
+var allDataFlag = false;
+var allData = [];
 
 addRowToNewExcel();
 function addRowToNewExcel() {
@@ -160,7 +164,6 @@ exports.setData = function (data) {
 
 
 	function otherAssignee(fieldTypeSIndex, fieldTypeEIndex) {
-		// localStorage.removeItem("stIndex");
 		if (fieldTypeSIndex && !fieldTypeEIndex) {
 			for (let i = fieldTypeSIndex + 1; i < historyData.length; i++) {
 				let date = historyData[i].created;
@@ -286,212 +289,227 @@ function writeExcel() {
 	debugger
 	ipData = false;
 	otFlag = false;
+	allDataFlag = false;
 	ipDataAdd = [];
 	otherAsDataAdd = [];
-	for (let i = 0; i < iRData.length; i++) {
+	allData = [];
 
-		// if (iRData.length > 0 && othAssData.length > 0 && iPrData.length > 0) {
-		// 	for (let j = 0; j < othAssData.length; j++) {
-		// 		for (let k = 0; k < iPrData.length; k++) {
-		// 			if (iRData[i].fromDate > othAssData[j].otherDate) {
-		// 				rowData6[1] = iRData[i].csi;
-		// 				rowData6[2] = iRData[i].fromDate;
-		// 				rowData6[3] = othAssData[j].otherDate;
-		// 				rowData6[4] = iRData[i].toName;
-		// 				rowData6[5] = othAssData[j].daysDiff;
-		// 				newSheet.addRow(rowData6);
-		// 				debugger
-		// 			} else if (othAssData[j].otherDate < iPrData[k].toDate) {
-		// 				rowData7[1] = othAssData[j].csi;
-		// 				rowData7[2] = othAssData[i].otherDate;
-		// 				rowData7[3] = iPrData[k].toDate;
-		// 				rowData7[4] = othAssData[j].otherName
-		// 				rowData7[5] = iPrData[k].totalDays;
-		// 				newSheet.addRow(rowData7);
-		// 				debugger
-		// 			}
-		// 			else {
-		// 				rowData8[1] = iRData[i].csi;
-		// 				rowData8[2] = iRData[i].fromDate;
-		// 				rowData8[4] = iRData[i].toName;
-		// 				rowData8[3] = iPrData[k].toDate;
-		// 				rowData8[5] = iPrData[k].totalDays;
-		// 				newSheet.addRow(rowData8);
-		// 				debugger
-		// 			}
-		// 		}
-
-		// 	}
-		// }
+	if (iRData.length > 0 && othAssData.length > 0 && iPrData.length > 0) {
 		debugger
-		if (iRData.length > 0 && othAssData.length > 0) {
-			for (let k = 0; k < othAssData.length; k++) {
-				if (iRData[i].csi == othAssData[k].csi) {
-					if (otFlag == false) {
-						//for csi-68643
-						// let irFstDate = iRData[i].fromDate;
-						// if (iRData.length != i + 1) {
-						// 	var irSecndDate = iRData[i + 1].fromDate;
-						// }
-						// let otThrdDate = othAssData[k].otherDate;
-						// debugger
-						// if (iPrData.length > 0) {
-						// 	if (irFstDate <= irSecndDate && otThrdDate >= irFstDate && otThrdDate <= irSecndDate) {
-						// 		debugger
-						// 		for (let j = i; j < iPrData.length; j++) {
-						// 			rowData1[1] = iRData[i].csi;
-						// 			rowData1[2] = iRData[i].fromDate;
-						// 			rowData1[4] = iRData[i].toName;
-						// 			rowData1[3] = iPrData[i].toDate;
-						// 			rowData1[5] = iPrData[i].totalDays;
-						// 			newSheet.addRow(rowData1);
-						// 			debugger
-						// 		}
-						// 	}
-						// }
-
-						rowData1[1] = iRData[i].csi;
-						rowData1[4] = iRData[i].toName;
-						let fstDate = iRData[i].fromDate;
-						let scndDate = othAssData[k].otherDate;
-						// assign later after input required
-						if (fstDate > scndDate) {
-							rowData1[2] = "";
-							rowData1[3] = othAssData[k].otherDate;
-							rowData1[6] = "Assignee was not assigned on same day.";
-						} else {
-							rowData1[2] = iRData[i].fromDate;
-							rowData1[3] = othAssData[k].otherDate;
-						}
-						rowData1[5] = othAssData[k].daysDiff;
-						otFlag = true;
-						newSheet.addRow(rowData1);
-						debugger
-					}
-
-					if (othAssData.length > 1) {
-						let otLen = othAssData.length;
-
-						rowData5[1] = othAssData[k].csi;
-						rowData5[2] = othAssData[k].otherDate;
-						rowData5[4] = othAssData[k].otherName;
-						if (otLen != (k + 1)) {
-							debugger
-							rowData5[3] = othAssData[k + 1].otherDate;
-							rowData5[5] = othAssData[k + 1].daysDiff;
-						}
-						otherAsDataAdd.push({ csi: rowData5[1], days: rowData5[5] });
-						newSheet.addRow(rowData5);
-						debugger
-					}
-				}
-			}
-		} else if (iRData.length > 0 && iPrData.length > 0) {
-			debugger
-			for (let j = i; j < iPrData.length; j++) {
-				if (iRData[i].csi == iPrData[j].csi) {
-					rowiPData1[1] = iRData[i].csi;
-					rowiPData1[2] = iRData[i].fromDate;
-					rowiPData1[4] = iRData[i].toName;
-					rowiPData1[3] = iPrData[i].toDate;
-					rowiPData1[5] = iPrData[i].totalDays;
-					newSheet.addRow(rowiPData1);
-					debugger
-					ipDataAdd.push({ csi: rowiPData1[1], days: rowiPData1[5] });
-					ipData = true;
-					break;
-				}
-			}
-		} else {
-			debugger
-			rowiRData1[1] = iRData[i].csi;
-			rowiRData1[2] = iRData[i].fromDate;
-			rowiRData1[4] = iRData[i].toName;
-			rowiRData1[3] = "";
-			rowiRData1[5] = iRData[i].tillTotalDays;
-			newSheet.addRow(rowiRData1);
-			debugger
+		allDataFlag = true;
+		for (let i = 0; i < iRData.length; i++) {
+			allData.push({ title: "input required", csi: iRData[i].csi, date: iRData[i].fromDate, name: iRData[i].toName, days: iRData[i].daysDiff, totalDays: iRData[i].tillTotalDays });
 		}
 
-		if (iPrData.length > 0) {
-			for (let j = 0; j < iPrData.length; j++) {
-				if (iRData[i].csi == iPrData[j].csi) {
+		for (let j = 0; j < othAssData.length; j++) {
+			allData.push({ title: "Other assigneee", csi: othAssData[j].csi, date: othAssData[j].otherDate, name: othAssData[j].otherName, days: othAssData[j].daysDiff });
+		}
 
-					if (rowData2.length == 0 && ipData == false) {
-						rowData2[1] = iPrData[j].csi;
-						rowData2[3] = iPrData[j].toDate;
-						if (othAssData.length > 0) {
-							let otLen = othAssData.length;
-							for (let k = 0; k < othAssData.length; k++) {
-								rowData2[2] = othAssData[otLen - 1].otherDate;
-								rowData2[4] = othAssData[k].otherName;
-								let startDT = rowData2[3];
-								let endDT = rowData2[2];
-								var startDate = Date.parse(startDT);
-								var endDate = Date.parse(endDT);
-								var timeDiff = startDate - endDate;
-								var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-								rowData2[5] = daysDiffOt;
-								othAssData = [];
+		for (let k = 0; k < iPrData.length; k++) {
+			allData.push({ title: "input provided", csi: iPrData[k].csi, date: iPrData[k].toDate, name: iPrData[k].toName, days: iPrData[k].daysDiff, totalDays: iPrData[k].tillTotalDays });
+		}
+		debugger
+		for (let i = 0; i < allData.length; i++) {
+			allData.sort(function (a, b) {
+				var dateA = new Date(a.date), dateB = new Date(b.date)
+				return dateA - dateB //sort by date ascending
+			})
+			debugger;
+			if ((i + 1) == (allData.length - 1)) {
+				debugger
+				break;
+			}
+			rowAllData[1] = allData[i].csi;
+			rowAllData[2] = allData[i].date;
+			if (allData.length != i + 1) {
+				rowAllData[3] = allData[i + 1].date;
+				var name = allData[i].name;
+				if (name == "") {
+					rowAllData[4] = "NIIT";
+				} else {
+					rowAllData[4] = name;
+				}
+
+				if (allData[i].title == "input required" && allData[i + 1].title == "Other assigneee") {
+					rowAllData[5] = allData[i + 1].days;
+				} else if (allData[i].title == "Other assigneee" && allData[i + 1].title == "input provided") {
+					var startDT = allData[i + 1].date;
+					var endDT = allData[i].date;
+					var startDate = Date.parse(startDT);
+					var endDate = Date.parse(endDT);
+					var timeDiff = startDate - endDate;
+					var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+					rowAllData[5] = daysDiffOt;
+					debugger
+				} else {
+					var startDT = allData[i + 1].date;
+					var endDT = allData[i].date;
+					var startDate = Date.parse(startDT);
+					var endDate = Date.parse(endDT);
+					var timeDiff = startDate - endDate;
+					var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+					rowAllData[5] = daysDiffOt;
+					debugger
+				}
+			}
+			newSheet.addRow(rowAllData);
+			debugger
+			allDataAdd.push({ csi: rowAllData[1], days: rowAllData[5] });
+
+		}
+	}
+	if (allDataFlag == false) {
+		for (let i = 0; i < iRData.length; i++) {
+			debugger
+			if (iRData.length > 0 && othAssData.length > 0) {
+				for (let k = 0; k < othAssData.length; k++) {
+					if (iRData[i].csi == othAssData[k].csi) {
+						if (otFlag == false) {
+
+							rowData1[1] = iRData[i].csi;
+							rowData1[4] = iRData[i].toName;
+							let fstDate = iRData[i].fromDate;
+							let scndDate = othAssData[k].otherDate;
+							// assign later after input required
+							if (fstDate > scndDate) {
+								rowData1[2] = "";
+								rowData1[3] = othAssData[k].otherDate;
+								rowData1[6] = "Assignee was not assigned on same day.";
+							} else {
+								rowData1[2] = iRData[i].fromDate;
+								rowData1[3] = othAssData[k].otherDate;
 							}
-						} else {
-							rowData2[2] = iRData[i].fromDate;
-							rowData2[3] = iPrData[j].toDate;
-							rowData2[4] = iPrData[j].toName;
-							rowData2[5] = iPrData[j].totalDays;
+							rowData1[5] = othAssData[k].daysDiff;
+							otFlag = true;
+							newSheet.addRow(rowData1);
+							debugger
 						}
-						newSheet.addRow(rowData2);
+
+						if (othAssData.length > 1) {
+							let otLen = othAssData.length;
+
+							rowData5[1] = othAssData[k].csi;
+							rowData5[2] = othAssData[k].otherDate;
+							rowData5[4] = othAssData[k].otherName;
+							if (otLen != (k + 1)) {
+								debugger
+								rowData5[3] = othAssData[k + 1].otherDate;
+								rowData5[5] = othAssData[k + 1].daysDiff;
+							}
+							otherAsDataAdd.push({ csi: rowData5[1], days: rowData5[5] });
+							newSheet.addRow(rowData5);
+							debugger
+						}
+					}
+				}
+			} else if (iRData.length > 0 && iPrData.length > 0) {
+				debugger
+				for (let j = i; j < iPrData.length; j++) {
+					if (iRData[i].csi == iPrData[j].csi) {
+						rowiPData1[1] = iRData[i].csi;
+						rowiPData1[2] = iRData[i].fromDate;
+						rowiPData1[4] = iRData[i].toName;
+						rowiPData1[3] = iPrData[i].toDate;
+						rowiPData1[5] = iPrData[i].totalDays;
+						newSheet.addRow(rowiPData1);
 						debugger
-					} else {
+						ipDataAdd.push({ csi: rowiPData1[1], days: rowiPData1[5] });
+						ipData = true;
 						break;
 					}
 				}
+			} else {
+				debugger
+				rowiRData1[1] = iRData[i].csi;
+				rowiRData1[2] = iRData[i].fromDate;
+				rowiRData1[4] = iRData[i].toName;
+				rowiRData1[3] = "";
+				rowiRData1[5] = iRData[i].tillTotalDays;
+				newSheet.addRow(rowiRData1);
+				debugger
 			}
-		}
-		if (othAssData.length > 0) {
-			for (let k = i; k < othAssData.length; k++) {
-				if (othAssData.length == 1) {
-					rowData3[1] = othAssData[k].csi;
-					rowData3[2] = othAssData[i].otherDate;
-					rowData3[3] = "";
-					rowData3[4] = othAssData[k].otherName;
-					let fst = othAssData[i].otherDate;
-					var today = new Date();
-					var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
-					var startDate = Date.parse(currentDate);
-					var endDate = Date.parse(fst);
-					var timeDiff = startDate - endDate;
-					var otDaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-					rowData3[5] = otDaysDiff;
-					newSheet.addRow(rowData3);
-					debugger
-				} else {
-					if (iRData[i].csi == othAssData[k].csi) {
-						rowData3[1] = othAssData[k].csi;
-						rowData3[2] = iRData[i].fromDate;
-						if (iPrData.length > 0) {
-							for (let j = 0; j < iPrData.length; j++) {
-								rowData3[3] = iPrData[j].toDate;
+
+			if (iPrData.length > 0) {
+				for (let j = 0; j < iPrData.length; j++) {
+					if (iRData[i].csi == iPrData[j].csi) {
+
+						if (rowData2.length == 0 && ipData == false) {
+							rowData2[1] = iPrData[j].csi;
+							rowData2[3] = iPrData[j].toDate;
+							if (othAssData.length > 0) {
+								let otLen = othAssData.length;
+								for (let k = 0; k < othAssData.length; k++) {
+									rowData2[2] = othAssData[otLen - 1].otherDate;
+									rowData2[4] = othAssData[k].otherName;
+									let startDT = rowData2[3];
+									let endDT = rowData2[2];
+									var startDate = Date.parse(startDT);
+									var endDate = Date.parse(endDT);
+									var timeDiff = startDate - endDate;
+									var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+									rowData2[5] = daysDiffOt;
+									othAssData = [];
+								}
+							} else {
+								rowData2[2] = iRData[i].fromDate;
+								rowData2[3] = iPrData[j].toDate;
+								rowData2[4] = iPrData[j].toName;
+								rowData2[5] = iPrData[j].totalDays;
 							}
+							newSheet.addRow(rowData2);
+							debugger
 						} else {
-							rowData3[3] = "";
+							break;
 						}
-						rowData3[4] = othAssData[k].otherName;
-						if (iRData.length > 0) {
-							rowData3[5] = iRData[i].tillTotalDays;
-						} else {
-							rowData3[5] = othAssData[k].daysDiff;
-						}
-						newSheet.addRow(rowData3);
-						debugger
 					}
 				}
+			}
+			if (othAssData.length > 0) {
+				for (let k = i; k < othAssData.length; k++) {
+					if (othAssData.length == 1) {
+						rowData3[1] = othAssData[k].csi;
+						rowData3[2] = othAssData[i].otherDate;
+						rowData3[3] = "";
+						rowData3[4] = othAssData[k].otherName;
+						let fst = othAssData[i].otherDate;
+						var today = new Date();
+						var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+						var startDate = Date.parse(currentDate);
+						var endDate = Date.parse(fst);
+						var timeDiff = startDate - endDate;
+						var otDaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+						rowData3[5] = otDaysDiff;
+						newSheet.addRow(rowData3);
+						debugger
+					} else {
+						if (iRData[i].csi == othAssData[k].csi) {
+							rowData3[1] = othAssData[k].csi;
+							rowData3[2] = iRData[i].fromDate;
+							if (iPrData.length > 0) {
+								for (let j = 0; j < iPrData.length; j++) {
+									rowData3[3] = iPrData[j].toDate;
+								}
+							} else {
+								rowData3[3] = "";
+							}
+							rowData3[4] = othAssData[k].otherName;
+							if (iRData.length > 0) {
+								rowData3[5] = iRData[i].tillTotalDays;
+							} else {
+								rowData3[5] = othAssData[k].daysDiff;
+							}
+							newSheet.addRow(rowData3);
+							debugger
+						}
+					}
 
+				}
 			}
 		}
 	}
 
-	if (rowData1.length > 0 || rowData2.length > 0 || rowData3.length > 0 || rowiPData1.length > 0 || rowiRData1.length > 0) {
+
+	if (rowData1.length > 0 || rowData2.length > 0 || rowAllData.length > 0 || rowData3.length > 0 || rowiPData1.length > 0 || rowiRData1.length > 0) {
 		debugger
 		totalData(rowData1, rowData2, rowData3);
 	}
@@ -505,6 +523,13 @@ function totalData(rowData1, rowData2, rowData3) {
 	rowData4[3] = "";
 	rowData4[4] = "Total";
 	debugger
+	if (rowAllData.length > 0 && allDataAdd.length > 0) {
+		let fstArraySum = 0;
+		for (let i = 0; i < allDataAdd.length; i++) {
+			fstArraySum += allDataAdd[i].days;
+			rowData4[5] = fstArraySum;
+		}
+	}
 	if (rowData1.length > 0 && rowData2.length > 0 && rowData3.length > 0 && flag2 == false && flag3 == false) {
 		flag1 = true;
 		debugger
