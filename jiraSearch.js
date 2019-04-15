@@ -16,8 +16,6 @@ search(
       // optionally initialise a progress bar or something
     },
     mapCallback: function (issue) {
-      debugger
-      console.log(issue);
       calculateDays.setData(issue);
     }
   }).then(function (issues) {

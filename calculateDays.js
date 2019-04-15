@@ -264,7 +264,7 @@ exports.setData = function (data) {
 		}
 	}
 
-	// writeExcel();
+	writeExcel();
 	var checkFunction = createExcel(filePath);
 	if (checkFunction == "flagExcel") {
 		iRData = [];
@@ -328,39 +328,42 @@ function writeExcel() {
 			for (let k = 0; k < othAssData.length; k++) {
 				if (iRData[i].csi == othAssData[k].csi) {
 					if (otFlag == false) {
-						let irFstDate = iRData[i].fromDate;
-						if (iRData.length != i + 1) {
-							var irSecndDate = iRData[i + 1].fromDate;
-						}
-						let otThrdDate = othAssData[k].otherDate;
-						debugger
-						if (irFstDate <= irSecndDate && otThrdDate >= irFstDate && otThrdDate <= irSecndDate) {
-							debugger
-							for (let j = i; j < iPrData.length; j++) {
-								rowData1[1] = iRData[i].csi;
-								rowData1[2] = iRData[i].fromDate;
-								rowData1[4] = iRData[i].toName;
-								rowData1[3] = iPrData[i].toDate;
-								rowData1[5] = iPrData[i].totalDays;
-								newSheet.addRow(rowData1);
-								debugger
-							}
+						//for csi-68643
+						// let irFstDate = iRData[i].fromDate;
+						// if (iRData.length != i + 1) {
+						// 	var irSecndDate = iRData[i + 1].fromDate;
+						// }
+						// let otThrdDate = othAssData[k].otherDate;
+						// debugger
+						// if (iPrData.length > 0) {
+						// 	if (irFstDate <= irSecndDate && otThrdDate >= irFstDate && otThrdDate <= irSecndDate) {
+						// 		debugger
+						// 		for (let j = i; j < iPrData.length; j++) {
+						// 			rowData1[1] = iRData[i].csi;
+						// 			rowData1[2] = iRData[i].fromDate;
+						// 			rowData1[4] = iRData[i].toName;
+						// 			rowData1[3] = iPrData[i].toDate;
+						// 			rowData1[5] = iPrData[i].totalDays;
+						// 			newSheet.addRow(rowData1);
+						// 			debugger
+						// 		}
+						// 	}
+						// }
+
+						rowData1[1] = iRData[i].csi;
+						rowData1[4] = iRData[i].toName;
+						let fstDate = iRData[i].fromDate;
+						let scndDate = othAssData[k].otherDate;
+						// assign later after input required
+						if (fstDate > scndDate) {
+							rowData1[2] = "";
+							rowData1[3] = othAssData[k].otherDate;
+							rowData1[6] = "Assignee was not assigned on same day.";
 						} else {
-							rowData1[1] = iRData[i].csi;
-							rowData1[4] = iRData[i].toName;
-							let fstDate = iRData[i].fromDate;
-							let scndDate = othAssData[k].otherDate;
-							// assign later after input required
-							if (fstDate > scndDate) {
-								rowData1[2] = "";
-								rowData1[3] = othAssData[k].otherDate;
-								rowData1[6] = "Assignee was not assigned on same day.";
-							} else {
-								rowData1[2] = iRData[i].fromDate;
-								rowData1[3] = othAssData[k].otherDate;
-							}
-							rowData1[5] = othAssData[k].daysDiff;
+							rowData1[2] = iRData[i].fromDate;
+							rowData1[3] = othAssData[k].otherDate;
 						}
+						rowData1[5] = othAssData[k].daysDiff;
 						otFlag = true;
 						newSheet.addRow(rowData1);
 						debugger
