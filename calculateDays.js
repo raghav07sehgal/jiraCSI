@@ -71,6 +71,7 @@ exports.setData = function (data) {
 		sIndex = null;
 		eIndex = null;
 		// dayFlag = true;
+
 		for (let j = 0; j < items.length; j++) {
 			let statusField = items[j].field;
 			let fieldType = items[j].fieldtype;
@@ -80,6 +81,7 @@ exports.setData = function (data) {
 					let toStatus = items[j].toString;
 					//status moved to input required
 					if (fromStatus == "Investigation & Research" && toStatus == "Inputs Required") {
+						debugger
 						index = j;
 						sIndex = j;
 						let moveDate = date.split("T");
@@ -94,6 +96,25 @@ exports.setData = function (data) {
 						calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
 						// iRData.push({ csi: issue.key, toName: assignee, fromDate: fromDate, daysDiff: daysDiff, tillTotalDays: SdaysDiff });
 					}
+
+					//status moved from V&A to input required
+					if (fromStatus == "V&A" && toStatus == "Inputs Required") {
+						debugger
+						index = j;
+						sIndex = j;
+						let moveDate = date.split("T");
+						let formatDate = new Date(moveDate[0]);
+						fromDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
+						let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
+						irDate.push(fromDate);
+						console.log("Move input date - " + printDate);
+						let time = moveDate[1];
+						let formatTime = time.split(".");
+						IRformatTime = formatTime[0];
+						calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+						// iRData.push({ csi: issue.key, toName: assignee, fromDate: fromDate, daysDiff: daysDiff, tillTotalDays: SdaysDiff });
+					}
+
 					//status returned from input required
 					if (fromStatus == "Inputs Required" && toStatus == "Investigation & Research") {
 						eIndex = j;
@@ -113,7 +134,28 @@ exports.setData = function (data) {
 						ipDate = [];
 						otAssDate = [];
 					}
+
+					//status returned from V&A to input required
+					if (fromStatus == "Inputs Required" && toStatus == "V&A") {
+						eIndex = j;
+						let returnDate = date.split("T");
+						let formatDate = new Date(returnDate[0]);
+						toDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
+						returnFlag = true;
+						let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
+						ipDate.push(toDate);
+						console.log("Return to NIIT Date - " + printDate + "\n");
+						let time = returnDate[1];
+						let formatTime = time.split(".");
+						IPformatTime = formatTime[0];
+						calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+						iPrData.push({ csi: issue.key, toName: assignee, toDate: toDate, AssdaysDiff: daysDiff, totalDays: TdaysDiff, tillTotalDays: SdaysDiff });
+						irDate = [];
+						ipDate = [];
+						otAssDate = [];
+					}
 				}
+
 				if (statusField == "assignee") {
 					//By whom assignee back to I&R state
 					// if (returnFlag && eIndex != null) {
@@ -124,8 +166,15 @@ exports.setData = function (data) {
 					// 	}
 					// }
 					if (index != null) {
+
+						// if (items[index + 1].field == "assignee") {
 						assignee = items[index + 1].toString;
 						console.log("IR assignee name - " + assignee);
+
+						// } else {
+						// 	continue;
+						// }
+
 						if (fromDate) {
 							iRData.push({ csi: issue.key, toName: assignee, fromDate: fromDate, daysDiff: daysDiff, tillTotalDays: SdaysDiff });
 							assignee = "";
@@ -163,111 +212,6 @@ exports.setData = function (data) {
 		}
 	}
 
-
-	function otherAssignee(fieldTypeSIndex, fieldTypeEIndex) {
-		if (fieldTypeSIndex && !fieldTypeEIndex) {
-			for (let i = fieldTypeSIndex + 1; i < historyData.length; i++) {
-				let date = historyData[i].created;
-				let items = historyData[i].items;
-				for (let j = 0; j < items.length; j++) {
-					let statusField = items[j].field;
-					let fieldType = items[j].fieldtype;
-					if (fieldType == "jira") {
-						if (statusField == "assignee") {
-							checkAsssignee = items[j].toString;
-							// var checkAsssignee = ignoreUser.includes(assignee);
-							var assignee = ignoreUser.indexOf(checkAsssignee);
-							if (assignee == -1) {
-								let moveDate = date.split("T");
-								let formatDate = new Date(moveDate[0]);
-								otherDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
-								let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
-								console.log("Next assignee date - " + printDate);
-								console.log("Next assignee - " + checkAsssignee + "\n");
-								otAssDate.push(otherDate);
-								let time = moveDate[1];
-								let formatTime = time.split(".");
-								OAformatTime.push(formatTime[0]);
-								calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
-								if (otherDate) {
-									othAssData.push({ csi: issue.key, otherName: checkAsssignee, otherDate: otherDate, daysDiff: daysDiff });
-								}
-							}
-							else {
-								continue;
-							}
-						} else if (statusField == "status") {
-							let fromStatus = items[j].fromString;
-							let toStatus = items[j].toString;
-							if (fromStatus == "Inputs Required" && toStatus == "Investigation & Research") {
-								// break;
-								return;
-							}
-						}
-					}
-				}
-			}
-		} else {
-			console.log("Now Ticket under NIIT account\n");
-			dayFlag = false;
-		}
-	}
-
-	function calculateDays(fromDate, toDate, nextAsDate, fromTime, toTime, nextAsTime) {
-		//Till next assignee day
-		if ((fromDate.length != 0) && (nextAsDate.length != 0) && (toDate.length == 0)) {
-			dayFlag = true;
-
-			//difference days between two assignees
-			if (nextAsDate.length > 1) {
-				var fstAsDate = nextAsDate[0];
-				for (let i = 1; i < nextAsDate.length; i++) {
-					var startDate = Date.parse(fstAsDate);
-					var endDate = Date.parse(nextAsDate[i]);
-					var timeDiff = endDate - startDate;
-					daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-					console.log("Assignee between other assignee difference days - " + daysDiff + "\n");
-					nextAsDate.shift();
-				}
-			} else {
-				for (let i = 0; i < fromDate.length; i++) {
-					var startDate = Date.parse(nextAsDate[i]);
-					var endDate = Date.parse(fromDate[i]);
-					var timeDiff = startDate - endDate;
-					daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-					console.log("Assignee difference days - " + daysDiff + "\n");
-				}
-			}
-		}
-		//Till return to NIIT days
-		if ((fromDate.length != 0) && (toDate.length != 0)) {
-			if ((nextAsDate.length >= 0)) {
-				dayFlag = true;
-				for (let i = 0; i < fromDate.length; i++) {
-					var startDate = Date.parse(toDate[i]);
-					var endDate = Date.parse(fromDate[i]);
-					var timeDiff = startDate - endDate;
-					TdaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-					console.log("Total Input days - " + TdaysDiff);
-				}
-			}
-		}
-		//still under input required days
-		if ((fromDate.length != 0) && (toDate.length == 0) && dayFlag == false) {
-			if ((nextAsDate.length >= 0)) {
-				for (let i = 0; i < fromDate.length; i++) {
-					var today = new Date();
-					var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
-					var startDate = Date.parse(currentDate);
-					var endDate = Date.parse(fromDate[i]);
-					var timeDiff = startDate - endDate;
-					SdaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-					console.log("Till Total Input days - " + SdaysDiff);
-				}
-			}
-		}
-	}
-
 	writeExcel();
 	var checkFunction = createExcel(filePath);
 	if (checkFunction == "flagExcel") {
@@ -276,6 +220,110 @@ exports.setData = function (data) {
 		othAssData = [];
 	}
 
+}
+
+function otherAssignee(fieldTypeSIndex, fieldTypeEIndex) {
+	if (fieldTypeSIndex && !fieldTypeEIndex) {
+		for (let i = fieldTypeSIndex + 1; i < historyData.length; i++) {
+			let date = historyData[i].created;
+			let items = historyData[i].items;
+			for (let j = 0; j < items.length; j++) {
+				let statusField = items[j].field;
+				let fieldType = items[j].fieldtype;
+				if (fieldType == "jira") {
+					if (statusField == "assignee") {
+						checkAsssignee = items[j].toString;
+						// var checkAsssignee = ignoreUser.includes(assignee);
+						var assignee = ignoreUser.indexOf(checkAsssignee);
+						if (assignee == -1) {
+							let moveDate = date.split("T");
+							let formatDate = new Date(moveDate[0]);
+							otherDate = formatDate.getFullYear() + "-" + (formatDate.getMonth() + 1) + '-' + formatDate.getDate();
+							let printDate = formatDate.getDate() + "/" + (formatDate.getMonth() + 1) + "/" + formatDate.getFullYear();
+							console.log("Next assignee date - " + printDate);
+							console.log("Next assignee - " + checkAsssignee + "\n");
+							otAssDate.push(otherDate);
+							let time = moveDate[1];
+							let formatTime = time.split(".");
+							OAformatTime.push(formatTime[0]);
+							calculateDays(irDate, ipDate, otAssDate, IRformatTime, IPformatTime, OAformatTime);
+							if (otherDate) {
+								othAssData.push({ csi: issue.key, otherName: checkAsssignee, otherDate: otherDate, daysDiff: daysDiff });
+							}
+						}
+						else {
+							continue;
+						}
+					} else if (statusField == "status") {
+						let fromStatus = items[j].fromString;
+						let toStatus = items[j].toString;
+						if (fromStatus == "Inputs Required" && toStatus == "Investigation & Research") {
+							// break;
+							return;
+						}
+					}
+				}
+			}
+		}
+	} else {
+		console.log("Now Ticket under NIIT account\n");
+		dayFlag = false;
+	}
+}
+
+function calculateDays(fromDate, toDate, nextAsDate, fromTime, toTime, nextAsTime) {
+	//Till next assignee day
+	if ((fromDate.length != 0) && (nextAsDate.length != 0) && (toDate.length == 0)) {
+		dayFlag = true;
+
+		//difference days between two assignees
+		if (nextAsDate.length > 1) {
+			var fstAsDate = nextAsDate[0];
+			for (let i = 1; i < nextAsDate.length; i++) {
+				var startDate = Date.parse(fstAsDate);
+				var endDate = Date.parse(nextAsDate[i]);
+				var timeDiff = endDate - startDate;
+				daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+				console.log("Assignee between other assignee difference days - " + daysDiff + "\n");
+				nextAsDate.shift();
+			}
+		} else {
+			for (let i = 0; i < fromDate.length; i++) {
+				var startDate = Date.parse(nextAsDate[i]);
+				var endDate = Date.parse(fromDate[i]);
+				var timeDiff = startDate - endDate;
+				daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+				console.log("Assignee difference days - " + daysDiff + "\n");
+			}
+		}
+	}
+	//Till return to NIIT days
+	if ((fromDate.length != 0) && (toDate.length != 0)) {
+		if ((nextAsDate.length >= 0)) {
+			dayFlag = true;
+			for (let i = 0; i < fromDate.length; i++) {
+				var startDate = Date.parse(toDate[i]);
+				var endDate = Date.parse(fromDate[i]);
+				var timeDiff = startDate - endDate;
+				TdaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+				console.log("Total Input days - " + TdaysDiff);
+			}
+		}
+	}
+	//still under input required days
+	if ((fromDate.length != 0) && (toDate.length == 0) && dayFlag == false) {
+		if ((nextAsDate.length >= 0)) {
+			for (let i = 0; i < fromDate.length; i++) {
+				var today = new Date();
+				var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+				var startDate = Date.parse(currentDate);
+				var endDate = Date.parse(fromDate[i]);
+				var timeDiff = startDate - endDate;
+				SdaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+				console.log("Till Total Input days - " + SdaysDiff);
+			}
+		}
+	}
 }
 
 function createExcel(excelFilePath) {
@@ -703,7 +751,7 @@ function totalData(rowData1, rowData2, rowData3) {
 			rowData4[5] = fst;
 		}
 	}
-	
+
 	newSheet.addRow(rowData4);
 
 	cleanData();
