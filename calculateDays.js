@@ -15,8 +15,8 @@ var aSFlag = false;
 var returnFlag = false;
 var otFlag = false;
 var ipData = false;
-// var filePath = "D:/raghavData/PROJECTS/project SM/Server/Report.xlsx";
-var filePath = "R:/my files/niit/jiraApi/jiraCSI/Report.xlsx";
+var filePath = "D:/raghavData/PROJECTS/project SM/Server/Report.xlsx";
+// var filePath = "R:/my files/niit/jiraApi/jiraCSI/Report.xlsx";
 var Excel = require('exceljs');// load exceljs module
 var workbook = new Excel.Workbook(); //create object of workbook
 var newSheet = workbook.addWorksheet('TestData');//add sheet to workbook
@@ -310,14 +310,16 @@ function writeExcel() {
 		}
 
 		for (let i = 0; i < allData.length; i++) {
+			var allDaLen = allData.length;
 			allData.sort((a, b) => (a.sort > b.sort) ? 1 : -1)
 			allData.sort(function (a, b) {
 				var dateA = new Date(a.date), dateB = new Date(b.date)
 				return dateA - dateB //sort by date ascending
 			})
-			debugger
+
 			if (allData.length != i + 1) {
-				if (allData[i].title == allData[i + 1].title) {
+
+				if ((allData[i].title == "input required") && (allData[i + 1].title == "input required")) {
 					allData.sort(function (a, b) {
 						var t1 = "input required";
 						var t2 = "Other assigneee";
@@ -332,11 +334,33 @@ function writeExcel() {
 						return 0;
 					})
 				}
+			}
+			if (allData[i].title == "input provided" && allData[i].title == "Other assigneee") {
+				continue;
+			}
+			debugger
+			if ((i + 1) == allDaLen) {
+				debugger
+				if (allData[allDaLen - 1].title == "Other assigneee" || allData[allDaLen - 1].title == "input required") {
+					debugger
+					rowAllData[1] = allData[i].csi;
+					rowAllData[2] = allData[i].date;
+					rowAllData[3] = "";
+					rowAllData[4] = allData[i].name;
+					var today = new Date();
+					var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+					var startDate = Date.parse(currentDate);
+					var endDate = Date.parse(allData[i].date);
+					var timeDiff = startDate - endDate;
+					var currentDaysdiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+					rowAllData[5] = currentDaysdiff;
+				}
+			}
 
-				debugger;
-				if (allData[i].title == "input provided") {
-					continue;
-				} else {
+			if (allData[i].title == "input provided") {
+				continue;
+			} else {
+				if (allData.length != i + 1) {
 					rowAllData[1] = allData[i].csi;
 					rowAllData[2] = allData[i].date;
 					rowAllData[3] = allData[i + 1].date;
@@ -369,7 +393,7 @@ function writeExcel() {
 			newSheet.addRow(rowAllData);
 			debugger
 			allDataAdd.push({ csi: rowAllData[1], days: rowAllData[5] });
-			debugger
+
 		}
 	}
 	if (allDataFlag == false) {
@@ -536,10 +560,10 @@ function totalData(rowData1, rowData2, rowData3) {
 	rowData4[2] = "";
 	rowData4[3] = "";
 	rowData4[4] = "Total";
-	debugger
+
 	if (rowAllData.length > 0 && allDataAdd.length > 0) {
 		let fstArraySum = 0;
-		debugger
+
 		for (let i = 0; i < allDataAdd.length; i++) {
 			fstArraySum += allDataAdd[i].days;
 			rowData4[5] = fstArraySum;
