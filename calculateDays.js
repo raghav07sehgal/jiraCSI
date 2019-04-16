@@ -286,81 +286,95 @@ function createExcel(excelFilePath) {
 }
 
 function writeExcel() {
-	debugger
+
 	ipData = false;
 	otFlag = false;
 	allDataFlag = false;
 	ipDataAdd = [];
 	otherAsDataAdd = [];
 	allData = [];
+	allDataAdd = [];
 
 	if (iRData.length > 0 && othAssData.length > 0 && iPrData.length > 0) {
-		debugger
 		allDataFlag = true;
 		for (let i = 0; i < iRData.length; i++) {
-			allData.push({ title: "input required", csi: iRData[i].csi, date: iRData[i].fromDate, name: iRData[i].toName, days: iRData[i].daysDiff, totalDays: iRData[i].tillTotalDays });
+			allData.push({ title: "input required", sort: "1", csi: iRData[i].csi, date: iRData[i].fromDate, name: iRData[i].toName, days: iRData[i].daysDiff, totalDays: iRData[i].tillTotalDays });
 		}
 
 		for (let j = 0; j < othAssData.length; j++) {
-			allData.push({ title: "Other assigneee", csi: othAssData[j].csi, date: othAssData[j].otherDate, name: othAssData[j].otherName, days: othAssData[j].daysDiff });
+			allData.push({ title: "Other assigneee", sort: "2", csi: othAssData[j].csi, date: othAssData[j].otherDate, name: othAssData[j].otherName, days: othAssData[j].daysDiff });
 		}
 
 		for (let k = 0; k < iPrData.length; k++) {
-			allData.push({ title: "input provided", csi: iPrData[k].csi, date: iPrData[k].toDate, name: iPrData[k].toName, days: iPrData[k].daysDiff, totalDays: iPrData[k].tillTotalDays });
+			allData.push({ title: "input provided", sort: "3", csi: iPrData[k].csi, date: iPrData[k].toDate, name: iPrData[k].toName, days: iPrData[k].daysDiff, totalDays: iPrData[k].tillTotalDays });
 		}
-		debugger
+
 		for (let i = 0; i < allData.length; i++) {
+			allData.sort((a, b) => (a.sort > b.sort) ? 1 : -1)
 			allData.sort(function (a, b) {
 				var dateA = new Date(a.date), dateB = new Date(b.date)
 				return dateA - dateB //sort by date ascending
 			})
-			debugger;
-			if ((i + 1) == (allData.length - 1)) {
-				debugger
-				break;
-			}
-			rowAllData[1] = allData[i].csi;
-			rowAllData[2] = allData[i].date;
+			debugger
 			if (allData.length != i + 1) {
-				rowAllData[3] = allData[i + 1].date;
-				var name = allData[i].name;
-				if (name == "") {
-					rowAllData[4] = "NIIT";
-				} else {
-					rowAllData[4] = name;
+				if (allData[i].title == allData[i + 1].title) {
+					allData.sort(function (a, b) {
+						var t1 = "input required";
+						var t2 = "Other assigneee";
+						var t3 = "input provided";
+						var title1 = a.title, title2 = b.title;
+						if (title1 == t1 && title2 == t1) {
+							return -1;
+						}
+						if (title1 == t3 && title2 == t3) {
+							return 1;
+						}
+						return 0;
+					})
 				}
 
-				if (allData[i].title == "input required" && allData[i + 1].title == "Other assigneee") {
-					rowAllData[5] = allData[i + 1].days;
-				} else if (allData[i].title == "Other assigneee" && allData[i + 1].title == "input provided") {
-					var startDT = allData[i + 1].date;
-					var endDT = allData[i].date;
-					var startDate = Date.parse(startDT);
-					var endDate = Date.parse(endDT);
-					var timeDiff = startDate - endDate;
-					var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-					rowAllData[5] = daysDiffOt;
-					debugger
+				debugger;
+				if (allData[i].title == "input provided") {
+					continue;
 				} else {
-					var startDT = allData[i + 1].date;
-					var endDT = allData[i].date;
-					var startDate = Date.parse(startDT);
-					var endDate = Date.parse(endDT);
-					var timeDiff = startDate - endDate;
-					var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-					rowAllData[5] = daysDiffOt;
-					debugger
+					rowAllData[1] = allData[i].csi;
+					rowAllData[2] = allData[i].date;
+					rowAllData[3] = allData[i + 1].date;
+					var name = allData[i].name;
+					rowAllData[4] = name;
+					if (allData[i].title == "input required" && allData[i + 1].title == "Other assigneee") {
+						rowAllData[5] = allData[i + 1].days;
+					} else if (allData[i].title == "Other assigneee" && allData[i + 1].title == "input provided") {
+						var startDT = allData[i + 1].date;
+						var endDT = allData[i].date;
+						var startDate = Date.parse(startDT);
+						var endDate = Date.parse(endDT);
+						var timeDiff = startDate - endDate;
+						var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+						rowAllData[5] = daysDiffOt;
+
+					} else {
+						var startDT = allData[i + 1].date;
+						var endDT = allData[i].date;
+						var startDate = Date.parse(startDT);
+						var endDate = Date.parse(endDT);
+						var timeDiff = startDate - endDate;
+						var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+						rowAllData[5] = daysDiffOt;
+
+					}
 				}
 			}
+
 			newSheet.addRow(rowAllData);
 			debugger
 			allDataAdd.push({ csi: rowAllData[1], days: rowAllData[5] });
-
+			debugger
 		}
 	}
 	if (allDataFlag == false) {
 		for (let i = 0; i < iRData.length; i++) {
-			debugger
+
 			if (iRData.length > 0 && othAssData.length > 0) {
 				for (let k = 0; k < othAssData.length; k++) {
 					if (iRData[i].csi == othAssData[k].csi) {
@@ -382,7 +396,7 @@ function writeExcel() {
 							rowData1[5] = othAssData[k].daysDiff;
 							otFlag = true;
 							newSheet.addRow(rowData1);
-							debugger
+
 						}
 
 						if (othAssData.length > 1) {
@@ -392,18 +406,18 @@ function writeExcel() {
 							rowData5[2] = othAssData[k].otherDate;
 							rowData5[4] = othAssData[k].otherName;
 							if (otLen != (k + 1)) {
-								debugger
+
 								rowData5[3] = othAssData[k + 1].otherDate;
 								rowData5[5] = othAssData[k + 1].daysDiff;
 							}
 							otherAsDataAdd.push({ csi: rowData5[1], days: rowData5[5] });
 							newSheet.addRow(rowData5);
-							debugger
+
 						}
 					}
 				}
 			} else if (iRData.length > 0 && iPrData.length > 0) {
-				debugger
+
 				for (let j = i; j < iPrData.length; j++) {
 					if (iRData[i].csi == iPrData[j].csi) {
 						rowiPData1[1] = iRData[i].csi;
@@ -412,21 +426,21 @@ function writeExcel() {
 						rowiPData1[3] = iPrData[i].toDate;
 						rowiPData1[5] = iPrData[i].totalDays;
 						newSheet.addRow(rowiPData1);
-						debugger
+
 						ipDataAdd.push({ csi: rowiPData1[1], days: rowiPData1[5] });
 						ipData = true;
 						break;
 					}
 				}
 			} else {
-				debugger
+
 				rowiRData1[1] = iRData[i].csi;
 				rowiRData1[2] = iRData[i].fromDate;
 				rowiRData1[4] = iRData[i].toName;
 				rowiRData1[3] = "";
 				rowiRData1[5] = iRData[i].tillTotalDays;
 				newSheet.addRow(rowiRData1);
-				debugger
+
 			}
 
 			if (iPrData.length > 0) {
@@ -457,7 +471,7 @@ function writeExcel() {
 								rowData2[5] = iPrData[j].totalDays;
 							}
 							newSheet.addRow(rowData2);
-							debugger
+
 						} else {
 							break;
 						}
@@ -480,7 +494,7 @@ function writeExcel() {
 						var otDaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 						rowData3[5] = otDaysDiff;
 						newSheet.addRow(rowData3);
-						debugger
+
 					} else {
 						if (iRData[i].csi == othAssData[k].csi) {
 							rowData3[1] = othAssData[k].csi;
@@ -499,7 +513,7 @@ function writeExcel() {
 								rowData3[5] = othAssData[k].daysDiff;
 							}
 							newSheet.addRow(rowData3);
-							debugger
+
 						}
 					}
 
@@ -510,7 +524,7 @@ function writeExcel() {
 
 
 	if (rowData1.length > 0 || rowData2.length > 0 || rowAllData.length > 0 || rowData3.length > 0 || rowiPData1.length > 0 || rowiRData1.length > 0) {
-		debugger
+
 		totalData(rowData1, rowData2, rowData3);
 	}
 }
@@ -525,6 +539,7 @@ function totalData(rowData1, rowData2, rowData3) {
 	debugger
 	if (rowAllData.length > 0 && allDataAdd.length > 0) {
 		let fstArraySum = 0;
+		debugger
 		for (let i = 0; i < allDataAdd.length; i++) {
 			fstArraySum += allDataAdd[i].days;
 			rowData4[5] = fstArraySum;
@@ -532,9 +547,9 @@ function totalData(rowData1, rowData2, rowData3) {
 	}
 	if (rowData1.length > 0 && rowData2.length > 0 && rowData3.length > 0 && flag2 == false && flag3 == false) {
 		flag1 = true;
-		debugger
+
 		if (rowiPData1.length > 0) {
-			debugger
+
 			if (rowiPData1[1] == rowData1[1]) {
 				if ((rowData1[1] == rowData2[1])) {
 					let fst = rowData1[5];
@@ -552,7 +567,7 @@ function totalData(rowData1, rowData2, rowData3) {
 				if (ipDataAdd.length > 1) {
 					var iPsum = 0;
 					for (let i = 0; i < ipDataAdd.length; i++) {
-						debugger
+
 						iPsum += ipDataAdd[i].days;
 						rowData4[5] = iPsum;
 					}
@@ -596,7 +611,7 @@ function totalData(rowData1, rowData2, rowData3) {
 	}
 
 	if (rowData1.length > 0 && rowData2.length > 0 && flag1 == false && flag3 == false) {
-		debugger
+
 		flag2 = true;
 		if (rowData1[1] == rowData2[1]) {
 			let fst = rowData1[5];
@@ -649,7 +664,7 @@ function totalData(rowData1, rowData2, rowData3) {
 		if (ipDataAdd.length > 1) {
 			var iPsum = 0;
 			for (let i = 0; i < ipDataAdd.length; i++) {
-				debugger
+
 				iPsum += ipDataAdd[i].days;
 				rowData4[5] = iPsum;
 			}
@@ -671,6 +686,7 @@ function totalData(rowData1, rowData2, rowData3) {
 		rowiPData1 = [];
 		rowData5 = [];
 		rowData4 = [];
+		allDataAdd = [];
 	} else if (flag2 == true) {
 		rowData1 = [];
 		rowData2 = [];
@@ -679,6 +695,7 @@ function totalData(rowData1, rowData2, rowData3) {
 		rowiPData1 = [];
 		rowData5 = [];
 		rowData4 = [];
+		allDataAdd = [];
 	} else {
 		rowData1 = [];
 		rowData2 = [];
@@ -687,6 +704,7 @@ function totalData(rowData1, rowData2, rowData3) {
 		rowiPData1 = [];
 		rowData5 = [];
 		rowData4 = [];
+		allDataAdd = [];
 	}
 }
 
@@ -698,5 +716,6 @@ function cleanData() {
 	rowiPData1 = [];
 	rowData5 = [];
 	rowData4 = [];
+	allDataAdd = [];
 }
 
