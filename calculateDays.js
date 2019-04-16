@@ -39,6 +39,7 @@ var allDataAdd = [];
 assignee = "";
 var allDataFlag = false;
 var allData = [];
+var otherAsgntFlag = false;
 
 addRowToNewExcel();
 function addRowToNewExcel() {
@@ -286,7 +287,6 @@ function createExcel(excelFilePath) {
 }
 
 function writeExcel() {
-
 	ipData = false;
 	otFlag = false;
 	allDataFlag = false;
@@ -338,11 +338,10 @@ function writeExcel() {
 			if (allData[i].title == "input provided" && allData[i].title == "Other assigneee") {
 				continue;
 			}
-			debugger
+
 			if ((i + 1) == allDaLen) {
-				debugger
 				if (allData[allDaLen - 1].title == "Other assigneee" || allData[allDaLen - 1].title == "input required") {
-					debugger
+
 					rowAllData[1] = allData[i].csi;
 					rowAllData[2] = allData[i].date;
 					rowAllData[3] = "";
@@ -376,7 +375,6 @@ function writeExcel() {
 						var timeDiff = startDate - endDate;
 						var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 						rowAllData[5] = daysDiffOt;
-
 					} else {
 						var startDT = allData[i + 1].date;
 						var endDT = allData[i].date;
@@ -385,15 +383,11 @@ function writeExcel() {
 						var timeDiff = startDate - endDate;
 						var daysDiffOt = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 						rowAllData[5] = daysDiffOt;
-
 					}
 				}
 			}
-
 			newSheet.addRow(rowAllData);
-			debugger
 			allDataAdd.push({ csi: rowAllData[1], days: rowAllData[5] });
-
 		}
 	}
 	if (allDataFlag == false) {
@@ -403,7 +397,6 @@ function writeExcel() {
 				for (let k = 0; k < othAssData.length; k++) {
 					if (iRData[i].csi == othAssData[k].csi) {
 						if (otFlag == false) {
-
 							rowData1[1] = iRData[i].csi;
 							rowData1[4] = iRData[i].toName;
 							let fstDate = iRData[i].fromDate;
@@ -420,23 +413,31 @@ function writeExcel() {
 							rowData1[5] = othAssData[k].daysDiff;
 							otFlag = true;
 							newSheet.addRow(rowData1);
-
 						}
 
 						if (othAssData.length > 1) {
 							let otLen = othAssData.length;
-
+							otherAsgntFlag = true;
 							rowData5[1] = othAssData[k].csi;
 							rowData5[2] = othAssData[k].otherDate;
-							rowData5[4] = othAssData[k].otherName;
 							if (otLen != (k + 1)) {
-
 								rowData5[3] = othAssData[k + 1].otherDate;
+								rowData5[4] = othAssData[k].otherName;
 								rowData5[5] = othAssData[k + 1].daysDiff;
+							} else {
+								rowData5[3] = "";
+								rowData5[4] = othAssData[k].otherName;
+								let fst = othAssData[k].otherDate;
+								var today = new Date();
+								var currentDate = (today.getMonth() + 1) + '/' + today.getDate() + '/' + today.getFullYear();
+								var startDate = Date.parse(currentDate);
+								var endDate = Date.parse(fst);
+								var timeDiff = startDate - endDate;
+								var otDaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+								rowData5[5] = otDaysDiff;
 							}
 							otherAsDataAdd.push({ csi: rowData5[1], days: rowData5[5] });
 							newSheet.addRow(rowData5);
-
 						}
 					}
 				}
@@ -450,21 +451,18 @@ function writeExcel() {
 						rowiPData1[3] = iPrData[i].toDate;
 						rowiPData1[5] = iPrData[i].totalDays;
 						newSheet.addRow(rowiPData1);
-
 						ipDataAdd.push({ csi: rowiPData1[1], days: rowiPData1[5] });
 						ipData = true;
 						break;
 					}
 				}
 			} else {
-
 				rowiRData1[1] = iRData[i].csi;
 				rowiRData1[2] = iRData[i].fromDate;
 				rowiRData1[4] = iRData[i].toName;
 				rowiRData1[3] = "";
 				rowiRData1[5] = iRData[i].tillTotalDays;
 				newSheet.addRow(rowiRData1);
-
 			}
 
 			if (iPrData.length > 0) {
@@ -502,7 +500,7 @@ function writeExcel() {
 					}
 				}
 			}
-			if (othAssData.length > 0) {
+			if (othAssData.length > 0 && otherAsgntFlag == false) {
 				for (let k = i; k < othAssData.length; k++) {
 					if (othAssData.length == 1) {
 						rowData3[1] = othAssData[k].csi;
@@ -518,7 +516,6 @@ function writeExcel() {
 						var otDaysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 						rowData3[5] = otDaysDiff;
 						newSheet.addRow(rowData3);
-
 					} else {
 						if (iRData[i].csi == othAssData[k].csi) {
 							rowData3[1] = othAssData[k].csi;
@@ -537,7 +534,6 @@ function writeExcel() {
 								rowData3[5] = othAssData[k].daysDiff;
 							}
 							newSheet.addRow(rowData3);
-
 						}
 					}
 
@@ -548,7 +544,6 @@ function writeExcel() {
 
 
 	if (rowData1.length > 0 || rowData2.length > 0 || rowAllData.length > 0 || rowData3.length > 0 || rowiPData1.length > 0 || rowiRData1.length > 0) {
-
 		totalData(rowData1, rowData2, rowData3);
 	}
 }
@@ -573,7 +568,6 @@ function totalData(rowData1, rowData2, rowData3) {
 		flag1 = true;
 
 		if (rowiPData1.length > 0) {
-
 			if (rowiPData1[1] == rowData1[1]) {
 				if ((rowData1[1] == rowData2[1])) {
 					let fst = rowData1[5];
@@ -591,7 +585,6 @@ function totalData(rowData1, rowData2, rowData3) {
 				if (ipDataAdd.length > 1) {
 					var iPsum = 0;
 					for (let i = 0; i < ipDataAdd.length; i++) {
-
 						iPsum += ipDataAdd[i].days;
 						rowData4[5] = iPsum;
 					}
@@ -644,6 +637,7 @@ function totalData(rowData1, rowData2, rowData3) {
 		}
 
 		if (otherAsDataAdd.length > 0) {
+
 			let fstArraySum = 0;
 			for (let i = 0; i < otherAsDataAdd.length; i++) {
 				if (otherAsDataAdd[i].csi == rowData2[1]) {
@@ -652,6 +646,7 @@ function totalData(rowData1, rowData2, rowData3) {
 					let scnd = rowData2[5];
 					let third = rowData1[5];
 					rowData4[5] = fst + scnd + third;
+
 				}
 			}
 
@@ -699,6 +694,16 @@ function totalData(rowData1, rowData2, rowData3) {
 	if (rowiRData1.length > 0 && flag1 == false && flag2 == false && flag3 == false) {
 		rowData4[5] = rowiRData1[5];
 	}
+
+	if (otherAsDataAdd.length > 0 && flag1 == false && flag2 == false && flag3 == false) {
+		let fstArraySum = 0;
+		for (let i = 0; i < otherAsDataAdd.length; i++) {
+			fstArraySum += otherAsDataAdd[i].days;
+			let fst = fstArraySum;
+			rowData4[5] = fst;
+		}
+	}
+	
 	newSheet.addRow(rowData4);
 
 	cleanData();
